@@ -39,7 +39,7 @@ router.get('/tree', function(req, res, next) {
                 Q.all(promises)
                     .then(function(items) {
                         root.items = items;
-                        res.status(200).json(root);
+                        res.status(200).json(items);
                     }, function(err) {
                         res.status(500).send(err);
                     })
