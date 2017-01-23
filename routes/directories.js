@@ -28,7 +28,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/tree', function(req, res, next) {
-    var root = { name: '练习题库', children: [] };
+    var root = { label: '练习题库', items: [] };
     Directory.find({ parent: { $exists: false } })
         .exec()
         .then(function(directories) {
@@ -37,8 +37,8 @@ router.get('/tree', function(req, res, next) {
                     promises.push(getNode(directory));
                 });
                 Q.all(promises)
-                    .then(function(children) {
-                        root.children = children;
+                    .then(function(items) {
+                        root.items = items;
                         res.status(200).json(root);
                     }, function(err) {
                         res.status(500).send(err);
@@ -66,8 +66,8 @@ function getChildren(parent) {
                         promises.push(getNode(directory));
                     });
                     Q.all(promises)
-                        .then(function(children) {
-                            defer.resolve(children);
+                        .then(function(items) {
+                            defer.resolve(items);
                         }, function(err) {
                             defer.reject(err);
                         })
@@ -85,12 +85,16 @@ function getNode(directory) {
 
     var defer = Q.defer();
     var node = {};
-    node.name = directory.name;
-    node._id = directory._id;
+    node.label = directory.name;
+    if (directory.level == 3) {
+        node.id = directory._id;
+        node.command = (event) => { loadDirectory(node.id) };
+    }
+
     getChildren(directory)
         .then(function(data) {
             if (data && data.length > 0) {
-                node.children = data;
+                node.items = data;
             }
             defer.resolve(node);
         }, function(err) {
