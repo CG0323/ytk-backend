@@ -88,7 +88,6 @@ function getNode(directory) {
     node.label = directory.name;
     if (directory.level == 3) {
         node.id = directory._id;
-        node.command = (event) => { loadDirectory(node.id) };
     }
 
     getChildren(directory)
