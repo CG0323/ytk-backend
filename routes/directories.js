@@ -86,9 +86,9 @@ function getNode(directory) {
     var defer = Q.defer();
     var node = {};
     node.label = directory.name;
-    // if (directory.level == 3) {
-    //     node.id = directory._id;
-    // }
+    if (directory.level == 3) {
+        node.id = directory._id;
+    }
 
     getChildren(directory)
         .then(function(data) {
