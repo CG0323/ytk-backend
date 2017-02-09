@@ -18,13 +18,13 @@ router.get('/register-admin', function(req, res) {
 });
 
 // 临时接口
-router.get('/register-admin', function(req, res) {
+router.get('/register-student', function(req, res) {
     User.register(new User({ username: config.student_username, name: 'cowboy', role: '学员' }), config.student_password, function(err, user) {
         if (err) {
             logger.error(err);
             res.status(500).send(err);
         } else {
-            res.status(200).json({ status: '管理员注册成功' });
+            res.status(200).json({ status: '学员注册成功' });
         }
     });
 });
