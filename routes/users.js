@@ -81,9 +81,9 @@ router.delete('/:id', function(req, res) {
 });
 
 router.get('/', function(req, res, next) {
-    if (!req.isAuthenticated()) {
-        res.status(401).send("请先登录");
-    }
+    // if (!req.isAuthenticated()) {
+    //     res.status(401).send("请先登录");
+    // }
     var query = {};
     var role = req.query.role;
     if (role == "teacher") {
