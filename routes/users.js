@@ -7,6 +7,7 @@ var logger = require('../utils/logger.js');
 var config = require('../common.js').config();
 // 临时接口
 router.get('/register-admin', function(req, res) {
+    console.log(config.admin_username);
     User.register(new User({ username: config.admin_username, name: '管理员', role: '管理员' }), config.admin_password, function(err, user) {
         if (err) {
             logger.error(err);
