@@ -18,6 +18,18 @@ router.get('/register-admin', function(req, res) {
 });
 
 // 临时接口
+router.get('/register-teacher', function(req, res) {
+    User.register(new User({ username: config.teacher_username, name: '祝老师', role: '老师' }), config.teacher_password, function(err, user) {
+        if (err) {
+            logger.error(err);
+            res.status(500).send(err);
+        } else {
+            res.status(200).json({ status: '老师注册成功' });
+        }
+    });
+});
+
+// 临时接口
 router.get('/register-student', function(req, res) {
     User.register(new User({ username: config.student_username, name: 'cowboy', role: '学员' }), config.student_password, function(err, user) {
         if (err) {
