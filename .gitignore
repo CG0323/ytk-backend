@@ -4,6 +4,8 @@
 env.json
 fabfile.py
 
+/logs
+
 # compiled output
 /dist
 /tmp
