@@ -35,6 +35,18 @@ router.post('/', function(req, res) {
 
 });
 
+router.post('/bulk', function(req, res) {
+    var certificates = req.body;
+
+    var bulk = Certificate.collection.initializeUnorderedBulkOp();
+    for (var i = 0; i < certificates.length; i++) {
+        bulk.find({ certificate_id: certificates[i].certificate_id }).upsert().updateOne(certificates[i]);
+    }
+    bulk.execute();
+    res.status(200).json({ message: '证书已成功批量添加' });
+
+});
+
 router.get('/', function(req, res, next) {
     Certificate.find()
         .exec()
