@@ -43,7 +43,7 @@ router.post('/bulk', function(req, res) {
         bulk.find({ certificate_id: certificates[i].certificate_id }).upsert().updateOne(certificates[i]);
     }
     bulk.execute();
-    res.status(200).json({ message: '证书已成功批量添加' });
+    res.status(200).json({ message: '成功添加' + certificates.length + "条证书记录" });
 
 });
 
