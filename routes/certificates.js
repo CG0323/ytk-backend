@@ -119,6 +119,17 @@ router.post('/search', function(req, res, next) {
         )
 });
 
-
+router.delete('/:id', function(req, res, next) {
+    var id = req.params.id;
+    Certificate.remove({ _id: id })
+        .exec()
+        .then(function(data) {
+                res.json({ message: "证书已成功删除" });
+            },
+            function(err) {
+                res.status(500).send(err);
+            }
+        )
+});
 
 module.exports = router;
