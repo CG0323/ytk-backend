@@ -7,6 +7,7 @@ var Q = require('q');
 router.post('/', function(req, res) {
     var data = req.body;
     Certificate.find({ certificate_id: data.certificate_id }, function(err, certificates) {
+
         if (certificates.length > 0) {
             var certificate = certificates[0];
             certificate.name = data.name;
@@ -36,6 +37,19 @@ router.post('/', function(req, res) {
 
 router.get('/', function(req, res, next) {
     Certificate.find()
+        .exec()
+        .then(function(certificates) {
+                res.json(certificates);
+            },
+            function(err) {
+                res.status(500).end();
+            }
+        )
+});
+
+router.get('/clear', function(req, res, next) {
+    Certificate.find()
+        .remove()
         .exec()
         .then(function(certificates) {
                 res.json(certificates);
