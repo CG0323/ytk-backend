@@ -70,7 +70,7 @@ router.get('/client-search/:search', function(req, res, next) {
                 res.json(certificates);
             },
             function(err) {
-                res.status(500).send("搜索证书失败");
+                res.status(500).send(err);
             }
         )
 });
@@ -82,7 +82,7 @@ router.post('/search', function(req, res, next) {
     var search = param.search;
     var conditions = {};
     if (search) {
-        conditions = { $text: { $search: search } };
+        conditions = { $or: [{ certificate_id: { $regex: search } }, { name: { $regex: search } }] };
     }
     Certificate.find(conditions)
         .sort({ date: -1 })
@@ -102,7 +102,7 @@ router.post('/search', function(req, res, next) {
                 });
             },
             function(err) {
-                res.status(500).send("搜索证书失败");
+                res.status(500).send(err);
             }
         )
 });

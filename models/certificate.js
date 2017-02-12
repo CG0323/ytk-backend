@@ -10,7 +10,7 @@ var schema = new mongoose.Schema({
     content: String
 });
 
-schema.index({ certificate_id: "text", name: "text" });
+schema.index({ date: 1 });
 mongoose.model('Certificate', schema);
 
 module.exports = function(connection) {
