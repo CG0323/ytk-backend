@@ -9,7 +9,7 @@ var jwt = require('jwt-simple');
 var exp_jwt = require('express-jwt');
 var moment = require('moment');
 
-router.get('/me', exp_jwt({ secret: config.token_secret }), function(req, res, next) {
+router.get('/me', function(req, res, next) {
 
     if (!req.user) {
         return res.json({});
