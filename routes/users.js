@@ -5,6 +5,21 @@ var User = require('../models/user.js')(db);
 var router = express.Router();
 var logger = require('../utils/logger.js');
 var config = require('../common.js').config();
+
+router.get('/me', function(req, res, next) {
+    if (!req.user) {
+        return res.json({});
+    };
+    User.findOne({ _id: req.user._id })
+        .exec()
+        .then(function(user) {
+            res.status(200).json(user);
+        }, function(err) {
+            logger.error(err);
+            res.status(500).send(err);
+        });
+});
+
 // 临时接口
 router.get('/register-admin', function(req, res) {
     User.register(new User({ username: config.admin_username, name: '管理员', role: '管理员' }), config.admin_password, function(err, user) {
@@ -47,7 +62,6 @@ router.post('/logout', function(req, res) {
 });
 
 router.post('/login', function(req, res, next) {
-    console.log(req.body);
     passport.authenticate('local', function(err, user, info) {
         if (err) {
             logger.error(err);
