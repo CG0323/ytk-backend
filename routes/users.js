@@ -5,8 +5,12 @@ var User = require('../models/user.js')(db);
 var router = express.Router();
 var logger = require('../utils/logger.js');
 var config = require('../common.js').config();
+var jwt = require('jwt-simple');
+var exp_jwt = require('express-jwt');
+var moment = require('moment');
 
-router.get('/me', function(req, res, next) {
+router.get('/me', exp_jwt({ secret: config.token_secret }), function(req, res, next) {
+
     if (!req.user) {
         return res.json({});
     };
@@ -70,14 +74,19 @@ router.post('/login', function(req, res, next) {
         if (!user) {
             return res.status(401).send("用户名或密码错误");
         }
-        req.logIn(user, function(err) {
-            if (err) {
-                logger.error(err);
-                return res.status(500).send('无法登录该用户');
-            }
-            logger.info(user.name + " 登录系统。" + req.clientIP);
-            res.status(200).json(user);
-        });
+        var secret = config.token_secret;
+        var expires = moment().add('days', 7).valueOf();
+        var token = jwt.encode({ iss: { _id: user._id, role: user.role }, expires: expires }, secret);
+        logger.info(user.name + " 登录系统。" + req.clientIP);
+        res.status(200).json({ token: token });
+        // req.login(user, function(err) {
+        //     if (err) {
+        //         logger.error(err);
+        //         return res.status(500).send('无法登录该用户');
+        //     }
+        //     logger.info(user.name + " 登录系统。" + req.clientIP);
+        //     res.status(200).json(user);
+        // });
     })(req, res, next);
 });
 

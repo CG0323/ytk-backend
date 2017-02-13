@@ -19,18 +19,17 @@ app.use(log4jsLogger);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
 app.use(cookieParser());
-app.use(session({
-    name: 'go',
-    secret: 'cg123456lalala',
-    saveUninitialized: false,
-    resave: false,
-    store: new MongoStore({ mongooseConnection: db })
-}));
+// app.use(session({
+//     name: 'go',
+//     secret: 'cg123456lalala',
+//     saveUninitialized: false,
+//     resave: false,
+//     store: new MongoStore({ mongooseConnection: db })
+// }));
 
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -44,8 +43,8 @@ app.use('/users', users);
 // passport config
 var User = require('./models/user')(db);
 passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+// passport.serializeUser(User.serializeUser());
+// passport.deserializeUser(User.deserializeUser());
 
 
 // development error handler
