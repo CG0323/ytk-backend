@@ -16,7 +16,7 @@ router.post('/', function(req, res) {
             certificate.save(function(err) {
                 if (err) {
                     logger.error(err);
-                    res.send(err);
+                    res.json({ error: err, message: "更新证书失败" });
                 }
                 logger.info(req.user.name + " 更新了证书，证书编号为：" + certificate.certificate_id + "。" + req.clientIP);
                 res.json({ message: '证书已成功更新' });
@@ -25,7 +25,7 @@ router.post('/', function(req, res) {
             var certificate = new Certificate(data);
             certificate.save(function(err, savedCertificate, numAffected) {
                 if (err) {
-                    res.status(500).send(err);
+                    res.status(500).json({ error: err, message: "保存证书失败" });
                 } else {
                     res.status(200).json({ message: "证书已保存" });
                 }
@@ -82,7 +82,7 @@ router.get('/client-search/:search', function(req, res, next) {
                 res.json(certificates);
             },
             function(err) {
-                res.status(500).send(err);
+                res.status(500).json({ error: err, message: "查询失败" });
             }
         )
 });
@@ -105,7 +105,7 @@ router.post('/search', function(req, res, next) {
                 Certificate.count(conditions, function(err, c) {
                     if (err) {
                         logger.error(err);
-                        res.status(500).send("获取证书总数失败");
+                        res.status(500).json({ error: "获取证书总数失败" });
                     }
                     res.status(200).json({
                         totalCount: c,
@@ -114,7 +114,7 @@ router.post('/search', function(req, res, next) {
                 });
             },
             function(err) {
-                res.status(500).send(err);
+                res.status(500).json({ error: err });
             }
         )
 });
@@ -127,7 +127,7 @@ router.delete('/:id', function(req, res, next) {
                 res.json({ message: "证书已成功删除" });
             },
             function(err) {
-                res.status(500).send(err);
+                res.status(500).json({ error: err, message: "证书删除失败" });
             }
         )
 });
