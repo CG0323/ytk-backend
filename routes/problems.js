@@ -33,8 +33,15 @@ router.get('/directories/:id', function(req, res, next) {
         .exec()
         .then(function(problems) {
                 problems = problems.sort((a, b) => {
-                    return ~~(a.name > b.name);
+                    if (a.name > b.name) {
+                        return 1;
+                    } else if (a.name < b.name) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
                 });
+                console.log(problems);
                 res.json(problems);
             },
             function(err) {
