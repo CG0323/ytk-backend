@@ -39,8 +39,6 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
     next();
 });
-app.use('/api', apis);
-app.use('/users', users);
 
 app.use(jwt({ secret: config.token_secret }).unless({
     path: [
@@ -51,6 +49,10 @@ app.use(jwt({ secret: config.token_secret }).unless({
         '/users/register-student',
     ]
 }));
+
+app.use('/api', apis);
+app.use('/users', users);
+
 
 // passport config
 var User = require('./models/user')(db);
