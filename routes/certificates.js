@@ -3,7 +3,8 @@ var db = require('../utils/database.js').connection;
 var Certificate = require('../models/certificate')(db);
 var router = express.Router();
 var Q = require('q');
-
+var exp_jwt = require('express-jwt');
+var config = require('../common.js').config();
 router.post('/', function(req, res) {
     var data = req.body;
     Certificate.find({ certificate_id: data.certificate_id }, function(err, certificates) {
@@ -59,18 +60,18 @@ router.get('/', function(req, res, next) {
         )
 });
 
-router.get('/clear', function(req, res, next) {
-    Certificate.find()
-        .remove()
-        .exec()
-        .then(function(certificates) {
-                res.json(certificates);
-            },
-            function(err) {
-                res.status(500).end();
-            }
-        )
-});
+// router.get('/clear', function(req, res, next) {
+//     Certificate.find()
+//         .remove()
+//         .exec()
+//         .then(function(certificates) {
+//                 res.json(certificates);
+//             },
+//             function(err) {
+//                 res.status(500).end();
+//             }
+//         )
+// });
 
 router.get('/client-search/:search', function(req, res, next) {
     var search = req.params.search;
@@ -87,7 +88,8 @@ router.get('/client-search/:search', function(req, res, next) {
         )
 });
 
-router.post('/search', function(req, res, next) {
+router.post('/search', exp_jwt({ secret: config.token_secret }), function(req, res, next) {
+
     var param = req.body;
     var first = param.first;
     var rows = param.rows;
