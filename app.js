@@ -10,6 +10,8 @@ var LocalStrategy = require('passport-local').Strategy;
 var db = require('./utils/database.js').connection;
 var users = require('./routes/users');
 var app = express()
+var jwt = require('express-jwt');
+var config = require('./common.js').config();
 
 if (app.get('env') === 'development') {
     app.use(logger('dev'));
@@ -40,11 +42,19 @@ app.use(function(req, res, next) {
 app.use('/api', apis);
 app.use('/users', users);
 
+app.use(jwt({ secret: config.token_secret }).unless({
+    path: [
+        '/users/login',
+        '/api/certificates/client-search/:search',
+        '/users/register-admin',
+        '/users/register-teacher',
+        '/users/register-student',
+    ]
+}));
+
 // passport config
 var User = require('./models/user')(db);
 passport.use(new LocalStrategy(User.authenticate()));
-// passport.serializeUser(User.serializeUser());
-// passport.deserializeUser(User.deserializeUser());
 
 
 // development error handler

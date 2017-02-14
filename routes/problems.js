@@ -11,7 +11,6 @@ router.post('/', function(req, res) {
             console.log(err);
             res.status(500).send(err);
         } else {
-
             res.status(200).json({ name: savedProblem.name });
         }
     });

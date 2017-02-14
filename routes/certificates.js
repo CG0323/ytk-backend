@@ -88,8 +88,8 @@ router.get('/client-search/:search', function(req, res, next) {
         )
 });
 
-router.post('/search', jwt({ secret: config.token_secret }), function(req, res, next) {
-    console.log(req.user);
+// router.post('/search', jwt({ secret: config.token_secret }), function(req, res, next) {
+router.post('/search', function(req, res, next) {
     var param = req.body;
     var first = param.first;
     var rows = param.rows;

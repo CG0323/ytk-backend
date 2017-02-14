@@ -9,21 +9,6 @@ var jwt = require('jwt-simple');
 var exp_jwt = require('express-jwt');
 var moment = require('moment');
 
-router.get('/me', function(req, res, next) {
-
-    if (!req.user) {
-        return res.json({});
-    };
-    User.findOne({ _id: req.user._id })
-        .exec()
-        .then(function(user) {
-            res.status(200).json(user);
-        }, function(err) {
-            logger.error(err);
-            res.status(500).send(err);
-        });
-});
-
 // 临时接口
 router.get('/register-admin', function(req, res) {
     User.register(new User({ username: config.admin_username, name: '管理员', role: '管理员' }), config.admin_password, function(err, user) {
@@ -60,10 +45,6 @@ router.get('/register-student', function(req, res) {
     });
 });
 
-// router.post('/logout', function(req, res) {
-//     req.logout();
-//     res.status(200).json({ status: 'Bye!' });
-// });
 
 router.post('/login', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
@@ -86,10 +67,6 @@ router.post('/login', function(req, res, next) {
 
 
 router.post('/', function(req, res) {
-    if (!req.isAuthenticated()) {
-        res.status(401).send("请先登录");
-    }
-
     var data = req.body;
     User.find({ username: data.username }, function(err, users) {
         if (users.length > 0) {
@@ -109,9 +86,6 @@ router.post('/', function(req, res) {
 });
 
 router.delete('/:id', function(req, res) {
-    if (!req.isAuthenticated()) {
-        res.status(401).send("请先登录");
-    }
     User.remove({ _id: req.params.id }, function(err, user) {
         if (err) {
             logger.error(err);
@@ -123,9 +97,6 @@ router.delete('/:id', function(req, res) {
 });
 
 router.get('/', function(req, res, next) {
-    // if (!req.isAuthenticated()) {
-    //     res.status(401).send("请先登录");
-    // }
     var query = {};
     var role = req.query.role;
     if (role == "teacher") {
@@ -145,9 +116,6 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/:id', function(req, res) {
-    if (!req.isAuthenticated()) {
-        res.status(401).send("请先登录");
-    }
     User.findOne({ _id: req.params.id })
         .exec()
         .then(function(user) {
