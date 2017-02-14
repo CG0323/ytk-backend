@@ -32,7 +32,7 @@ router.get('/directories/:id', function(req, res, next) {
     Problem.find({ parent: req.params.id })
         .exec()
         .then(function(problems) {
-                problems.sort(keysrt('name', false));
+                problems = problems.sort(keysrt('name', false));
                 res.json(problems);
             },
             function(err) {
