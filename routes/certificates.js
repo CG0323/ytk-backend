@@ -88,7 +88,7 @@ router.get('/client-search/:search', function(req, res, next) {
         )
 });
 
-router.post('/search', jwt({ secret: "cgmontreal2017" }), function(req, res, next) {
+router.post('/search', function(req, res, next) {
 
     var param = req.body;
     var first = param.first;
