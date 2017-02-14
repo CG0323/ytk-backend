@@ -60,10 +60,10 @@ router.get('/register-student', function(req, res) {
     });
 });
 
-router.post('/logout', function(req, res) {
-    req.logout();
-    res.status(200).json({ status: 'Bye!' });
-});
+// router.post('/logout', function(req, res) {
+//     req.logout();
+//     res.status(200).json({ status: 'Bye!' });
+// });
 
 router.post('/login', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
@@ -76,7 +76,8 @@ router.post('/login', function(req, res, next) {
         }
         var secret = config.token_secret;
         var expires = moment().add('days', 7).valueOf();
-        var token = jwt.encode({ iss: { _id: user._id, role: user.role }, expires: expires }, secret);
+        // var token = jwt.encode({ iss: { _id: user._id, role: user.role }, expires: expires }, secret);
+        var token = jwt.encode({ _id: user._id, role: user.role }, secret);
         logger.info(user.name + " 登录系统。" + req.clientIP);
         res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token });
 
