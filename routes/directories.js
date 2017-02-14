@@ -67,6 +67,7 @@ function getChildren(parent) {
                     });
                     Q.all(promises)
                         .then(function(items) {
+                            items.sort(keysrt('label', false));
                             defer.resolve(items);
                         }, function(err) {
                             defer.reject(err);
@@ -100,6 +101,15 @@ function getNode(directory) {
             defer.reject(err);
         })
     return defer.promise;
+}
+
+function keysrt(key, desc) {
+
+    return function(a, b) {
+
+        return desc ? ~~(a[key] < b[key]) : ~~(a[key] > b[key]);
+
+    }
 }
 
 module.exports = router;
