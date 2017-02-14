@@ -89,7 +89,7 @@ router.get('/client-search/:search', function(req, res, next) {
 });
 
 router.post('/search', function(req, res, next) {
-
+    console.log(req.headers);
     var param = req.body;
     var first = param.first;
     var rows = param.rows;
