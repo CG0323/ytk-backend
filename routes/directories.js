@@ -67,6 +67,9 @@ function getChildren(parent) {
                     });
                     Q.all(promises)
                         .then(function(items) {
+                            items = items.sort((a, b) => {
+                                return ~~(a.label > b.label);
+                            })
                             items = items.sort(keysrt('label', false));
                             defer.resolve(items);
                         }, function(err) {

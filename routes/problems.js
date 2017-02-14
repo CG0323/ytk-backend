@@ -32,7 +32,9 @@ router.get('/directories/:id', function(req, res, next) {
     Problem.find({ parent: req.params.id })
         .exec()
         .then(function(problems) {
-                problems = problems.sort(keysrt('name', false));
+                problems = problems.sort((a, b) => {
+                    return ~~(a.name > b.name);
+                });
                 res.json(problems);
             },
             function(err) {
@@ -41,13 +43,5 @@ router.get('/directories/:id', function(req, res, next) {
         )
 });
 
-function keysrt(key, desc) {
-
-    return function(a, b) {
-
-        return desc ? ~~(a[key] < b[key]) : ~~(a[key] > b[key]);
-
-    }
-}
 
 module.exports = router;
