@@ -68,7 +68,13 @@ function getChildren(parent) {
                     Q.all(promises)
                         .then(function(items) {
                             items = items.sort((a, b) => {
-                                return ~~(a.label > b.label);
+                                if (a.label > b.label) {
+                                    return 1;
+                                } else if (a.label < b.label) {
+                                    return -1;
+                                } else {
+                                    return 0;
+                                }
                             })
                             items = items.sort(keysrt('label', false));
                             defer.resolve(items);
