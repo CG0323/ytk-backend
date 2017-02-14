@@ -43,7 +43,7 @@ app.use(function(req, res, next) {
 app.use(jwt({ secret: config.token_secret }).unless({
     path: [
         '/users/login',
-        '/api/certificates/client-search/:search',
+        '/api/certificates/client-search',
         '/users/register-admin',
         '/users/register-teacher',
         '/users/register-student',
