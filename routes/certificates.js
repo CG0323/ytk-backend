@@ -5,7 +5,7 @@ var router = express.Router();
 var Q = require('q');
 var jwt = require('express-jwt');
 var config = require('../common.js').config();
-router.post('/', function(req, res) {
+router.post('/', jwt({ secret: config.token_secret }), function(req, res) {
     var data = req.body;
     Certificate.find({ certificate_id: data.certificate_id }, function(err, certificates) {
 
@@ -36,7 +36,7 @@ router.post('/', function(req, res) {
 
 });
 
-router.post('/bulk', function(req, res) {
+router.post('/bulk', jwt({ secret: config.token_secret }), function(req, res) {
     var certificates = req.body;
 
     var bulk = Certificate.collection.initializeUnorderedBulkOp();
@@ -48,7 +48,7 @@ router.post('/bulk', function(req, res) {
 
 });
 
-router.get('/', function(req, res, next) {
+router.get('/', jwt({ secret: config.token_secret }), function(req, res, next) {
     Certificate.find()
         .exec()
         .then(function(certificates) {
@@ -89,7 +89,7 @@ router.get('/client-search/:search', function(req, res, next) {
 });
 
 // router.post('/search', jwt({ secret: config.token_secret }), function(req, res, next) {
-router.post('/search', function(req, res, next) {
+router.post('/search', jwt({ secret: config.token_secret }), function(req, res, next) {
     var param = req.body;
     var first = param.first;
     var rows = param.rows;
@@ -121,7 +121,7 @@ router.post('/search', function(req, res, next) {
         )
 });
 
-router.delete('/:id', function(req, res, next) {
+router.delete('/:id', jwt({ secret: config.token_secret }), function(req, res, next) {
     var id = req.params.id;
     Certificate.remove({ _id: id })
         .exec()

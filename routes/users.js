@@ -66,7 +66,7 @@ router.post('/login', function(req, res, next) {
 });
 
 
-router.post('/', function(req, res) {
+router.post('/', jwt({ secret: config.token_secret }), function(req, res) {
     var data = req.body;
     User.find({ username: data.username }, function(err, users) {
         if (users.length > 0) {
@@ -85,7 +85,7 @@ router.post('/', function(req, res) {
     })
 });
 
-router.delete('/:id', function(req, res) {
+router.delete('/:id', jwt({ secret: config.token_secret }), function(req, res) {
     User.remove({ _id: req.params.id }, function(err, user) {
         if (err) {
             logger.error(err);
@@ -96,7 +96,7 @@ router.delete('/:id', function(req, res) {
     });
 });
 
-router.get('/', function(req, res, next) {
+router.get('/', jwt({ secret: config.token_secret }), function(req, res, next) {
     var query = {};
     var role = req.query.role;
     if (role == "teacher") {
@@ -115,7 +115,7 @@ router.get('/', function(req, res, next) {
         )
 });
 
-router.get('/:id', function(req, res) {
+router.get('/:id', jwt({ secret: config.token_secret }), function(req, res) {
     User.findOne({ _id: req.params.id })
         .exec()
         .then(function(user) {
@@ -126,7 +126,7 @@ router.get('/:id', function(req, res) {
         });
 });
 
-router.put('/:id', function(req, res) {
+router.put('/:id', jwt({ secret: config.token_secret }), function(req, res) {
     User.findById(req.params.id, function(err, user) {
         if (err)
             res.send(err);
