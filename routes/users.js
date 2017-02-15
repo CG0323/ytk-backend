@@ -56,8 +56,8 @@ router.post('/login', function(req, res, next) {
             return res.status(401).send("用户名或密码错误");
         }
         var secret = config.token_secret;
-        var expires = moment().add(7, 'days').valueOf();
-        var token = jwts.encode({ iss: { _id: user._id, role: user.role }, expires: expires }, secret);
+        var expires = moment().add(2, 'minutes').valueOf();
+        var token = jwts.encode({ iss: { _id: user._id, name: user.name, role: user.role }, expires: expires }, secret);
         // var token = jwts.encode({ _id: user._id, role: user.role }, secret);
         logger.info(user.name + " 登录系统。" + req.clientIP);
         res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token });
