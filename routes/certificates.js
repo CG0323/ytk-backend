@@ -5,6 +5,8 @@ var router = express.Router();
 var Q = require('q');
 var jwt = require('express-jwt');
 var config = require('../common.js').config();
+var logger = require('../utils/logger.js');
+
 router.post('/', jwt({ secret: config.token_secret }), function(req, res) {
     var data = req.body;
     Certificate.find({ certificate_id: data.certificate_id }, function(err, certificates) {
