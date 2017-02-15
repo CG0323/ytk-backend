@@ -5,7 +5,7 @@ var User = require('../models/user.js')(db);
 var router = express.Router();
 var logger = require('../utils/logger.js');
 var config = require('../common.js').config();
-var jwts = require('jwt-simple');
+var jwt_generator = require('jsonwebtoken');
 var jwt = require('express-jwt');
 var moment = require('moment');
 
@@ -57,7 +57,8 @@ router.post('/login', function(req, res, next) {
         }
         var secret = config.token_secret;
         var expires = moment().add(2, 'minutes').valueOf();
-        var token = jwts.encode({ iss: { _id: user._id, name: user.name, role: user.role }, expires: expires }, secret);
+        var token = jwt_generator.sign({ _id: user._id, name: user.name, role: user.role }, secret, { expiresIn: '1h' });
+        // var token = jwts.encode({ iss: { _id: user._id, name: user.name, role: user.role }, expires: expires }, secret);
         // var token = jwts.encode({ _id: user._id, role: user.role }, secret);
         logger.info(user.name + " 登录系统。" + req.clientIP);
         res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token });
