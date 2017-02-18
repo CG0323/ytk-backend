@@ -42,7 +42,14 @@ router.get('/directories/:id', function(req, res, next) {
                         return 0;
                     }
                 });
-                res.json(problems);
+                var retValue = problems.map(item => {
+                    var problem = {};
+                    problem._id = item._id;
+                    problem.name = item.name;
+                    problem.sgf = item.sgf;
+                    problem.path = item.parent.parent.parent.name + "->" + item.parent.parent.name + "->" + item.parent.name + "->" + item.name;
+                })
+                res.json(retValue);
             },
             function(err) {
                 res.status(500).end();
