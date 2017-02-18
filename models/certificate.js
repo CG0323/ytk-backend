@@ -11,6 +11,7 @@ var schema = new mongoose.Schema({
 });
 
 schema.index({ date: 1 });
+schema.index({ name: 1, certificate_id: 1 });
 mongoose.model('Certificate', schema);
 
 module.exports = function(connection) {
