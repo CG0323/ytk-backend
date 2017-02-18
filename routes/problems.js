@@ -30,6 +30,7 @@ router.get('/', function(req, res, next) {
 
 router.get('/directories/:id', function(req, res, next) {
     Problem.find({ parent: req.params.id })
+        .deepPopulate('parent.parent.parent')
         .exec()
         .then(function(problems) {
                 problems = problems.sort((a, b) => {
@@ -41,7 +42,6 @@ router.get('/directories/:id', function(req, res, next) {
                         return 0;
                     }
                 });
-                console.log(problems);
                 res.json(problems);
             },
             function(err) {
