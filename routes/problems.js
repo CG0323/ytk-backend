@@ -48,6 +48,7 @@ router.get('/directories/:id', function(req, res, next) {
                     problem.name = item.name;
                     problem.sgf = item.sgf;
                     problem.path = item.parent.parent.parent.name + "->" + item.parent.parent.name + "->" + item.parent.name + "->" + item.name;
+                    return problem;
                 })
                 res.json(retValue);
             },
