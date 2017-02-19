@@ -3,6 +3,7 @@ var db = require('../utils/database.js').connection;
 var WrongRecord = require('../models/wrongrecord')(db);
 var router = express.Router();
 var Q = require('q');
+var config = require('../common.js').config();
 var jwt = require('express-jwt');
 
 router.post('/', jwt({ secret: config.token_secret }), function(req, res) {
