@@ -46,6 +46,7 @@ router.get('/', jwt({ secret: config.token_secret }), function(req, res, next) {
     WrongRecord.find({ user: userId })
         .exec()
         .then(function(records) {
+                console.log(records);
                 var problems = records.map(rec => rec.problem);
                 res.json(problems);
             },
