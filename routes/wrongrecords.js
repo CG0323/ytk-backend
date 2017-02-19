@@ -62,6 +62,7 @@ router.get('/withcontent', jwt({ secret: config.token_secret }), function(req, r
         .exec()
         .then(function(records) {
                 var problems = records.map(rec => {
+                    let item = rec.problem;
                     var problem = {};
                     problem._id = item._id;
                     problem.name = item.name;
