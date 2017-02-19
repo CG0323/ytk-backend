@@ -43,10 +43,9 @@ router.post('/', jwt({ secret: config.token_secret }), function(req, res) {
 
 router.get('/', jwt({ secret: config.token_secret }), function(req, res, next) {
     var user = req.user;
-    WrongRecord.find({ user: userId })
+    WrongRecord.find({ user: user._id })
         .exec()
         .then(function(records) {
-                console.log(records);
                 var problems = records.map(rec => rec.problem);
                 res.json(problems);
             },
@@ -58,7 +57,7 @@ router.get('/', jwt({ secret: config.token_secret }), function(req, res, next) {
 
 router.get('/withcontent', jwt({ secret: config.token_secret }), function(req, res, next) {
     var user = req.user;
-    WrongRecord.find({ user: userId })
+    WrongRecord.find({ user: user._id })
         .populate('problem')
         .exec()
         .then(function(records) {
