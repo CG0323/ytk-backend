@@ -55,6 +55,21 @@ router.get('/', jwt({ secret: config.token_secret }), function(req, res, next) {
         )
 });
 
+router.get('/withcontent', jwt({ secret: config.token_secret }), function(req, res, next) {
+    var user = req.user;
+    WrongRecord.find({ user: userId })
+        .populate('problem')
+        .exec()
+        .then(function(records) {
+                var problems = records.map(rec => rec.problem);
+                res.json(problems);
+            },
+            function(err) {
+                res.status(500).end();
+            }
+        )
+});
+
 router.get('/user/:userId', function(req, res, next) {
     var userId = req.params.userId;
     WrongRecord.find({ user: userId })
