@@ -62,8 +62,11 @@ router.get('/withcontent', jwt({ secret: config.token_secret }), function(req, r
         .exec()
         .then(function(records) {
                 var problems = records.map(rec => {
-                    var problem = rec.problem;
-                    problem.path = problem.parent.parent.parent.name + "/" + problem.parent.parent.name + "/" + problem.parent.name + "/" + problem.name;
+                    var problem = {};
+                    problem._id = item._id;
+                    problem.name = item.name;
+                    problem.sgf = item.sgf;
+                    problem.path = item.parent.parent.parent.name + "/" + item.parent.parent.name + "/" + item.parent.name + "/" + item.name;
                     return problem;
                 });
                 res.json(problems);
