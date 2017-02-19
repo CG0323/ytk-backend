@@ -64,6 +64,7 @@ router.get('/withcontent', jwt({ secret: config.token_secret }), function(req, r
                 var problems = records.map(rec => {
                     var problem = rec.problem;
                     problem.path = problem.parent.parent.parent.name + "/" + problem.parent.parent.name + "/" + problem.parent.name + "/" + problem.name;
+                    return problem;
                 });
                 res.json(problems);
             },
