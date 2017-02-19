@@ -41,13 +41,14 @@ router.post('/', jwt({ secret: config.token_secret }), function(req, res) {
     }
 });
 
-// 临时接口
-router.get('/', function(req, res, next) {
-    WrongRecord.find({})
+router.get('/', jwt({ secret: config.token_secret }), function(req, res, next) {
+    var user = req.user;
+    WrongRecord.find({ user: userId })
         .populate('problem')
         .exec()
         .then(function(records) {
-                res.json(records);
+                var problems = records.map(rec => rec.problem);
+                res.json(problems);
             },
             function(err) {
                 res.status(500).end();
