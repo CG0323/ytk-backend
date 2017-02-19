@@ -7,6 +7,8 @@ var schema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     problem: { type: mongoose.Schema.Types.ObjectId, ref: 'Problem' },
 });
+var deepPopulate = require('mongoose-deep-populate')(mongoose);
+schema.plugin(deepPopulate);
 
 schema.index({ user: 1 });
 mongoose.model('WrongRecord', schema);

@@ -58,10 +58,13 @@ router.get('/', jwt({ secret: config.token_secret }), function(req, res, next) {
 router.get('/withcontent', jwt({ secret: config.token_secret }), function(req, res, next) {
     var user = req.user;
     WrongRecord.find({ user: user._id })
-        .populate('problem')
+        .deepPopulate('problem.parent.parent.parent')
         .exec()
         .then(function(records) {
-                var problems = records.map(rec => rec.problem);
+                var problems = records.map(rec => {
+                    var problem = rec.problem;
+                    problem.path = problem.parent.parent.parent.name + "/" + problem.parent.parent.name + "/" + problem.parent.name + "/" + problem.name;
+                });
                 res.json(problems);
             },
             function(err) {
