@@ -203,6 +203,7 @@ router.get('/students', jwt({ secret: config.token_secret }), function(req, res,
         query = { teacher: user._id, role: "学员" };
     }
     User.find(query)
+        .populate('teacher')
         .exec()
         .then(function(users) {
                 res.json(users);
