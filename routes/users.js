@@ -198,7 +198,10 @@ router.get('/students', jwt({ secret: config.token_secret }), function(req, res,
     if (user.role == "学员") {
         res.status(401).json({ message: "无权限查看学员账号" });
     }
-    var query = { teacher: user._id, role: "学员" };
+    var query = { role: "学员" };
+    if (user.role == "老师") {
+        query = { teacher: user._id, role: "学员" };
+    }
     User.find(query)
         .exec()
         .then(function(users) {
