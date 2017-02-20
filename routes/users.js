@@ -11,7 +11,7 @@ var moment = require('moment');
 
 // 临时接口
 router.get('/register-admin', function(req, res) {
-    User.register(new User({ username: config.admin_username, name: '管理员', role: '管理员' }), config.admin_password, function(err, user) {
+    User.register(new User({ username: config.admin_username, name: '管理员', role: '管理员', expired_at: new Date("2030-12-31") }), config.admin_password, function(err, user) {
         if (err) {
             logger.error(err);
             res.status(500).send(err);
@@ -23,7 +23,7 @@ router.get('/register-admin', function(req, res) {
 
 // 临时接口
 router.get('/register-teacher', function(req, res) {
-    User.register(new User({ username: config.teacher_username, name: '祝老师', role: '老师' }), config.teacher_password, function(err, user) {
+    User.register(new User({ username: config.teacher_username, name: '祝老师', role: '老师', init_password: config.teacher_password, expired_at: new Date("2030-12-31") }), config.teacher_password, function(err, user) {
         if (err) {
             logger.error(err);
             res.status(500).send(err);
@@ -35,7 +35,7 @@ router.get('/register-teacher', function(req, res) {
 
 // 临时接口
 router.get('/register-student', function(req, res) {
-    User.register(new User({ username: config.student_username, name: 'cowboy', role: '学员' }), config.student_password, function(err, user) {
+    User.register(new User({ username: config.student_username, name: 'cowboy', role: '学员', init_password: config.student_password }), config.student_password, function(err, user) {
         if (err) {
             logger.error(err);
             res.status(500).send(err);
@@ -43,6 +43,19 @@ router.get('/register-student', function(req, res) {
             res.status(200).json({ status: '学员注册成功' });
         }
     });
+});
+
+// 临时接口
+router.get('/clear', function(req, res, next) {
+    User.remove()
+        .exec()
+        .then(function(data) {
+                res.json(data);
+            },
+            function(err) {
+                res.status(500).end();
+            }
+        )
 });
 
 
@@ -64,18 +77,43 @@ router.post('/login', function(req, res, next) {
 });
 
 
-router.post('/', jwt({ secret: config.token_secret }), function(req, res) {
+// router.post('/', jwt({ secret: config.token_secret }), function(req, res) {
+//     var data = req.body;
+//     User.find({ username: data.username }, function(err, users) {
+//         if (users.length > 0) {
+//             res.status(400).send('系统中已存在该账号');
+//         } else {
+//             User.register(new User({ username: data.username, name: data.name, role: data.role }), data.password, function(err, user) {
+//                 if (err) {
+//                     logger.error(err);
+//                     res.status(500).json({ message: err });
+//                 } else {
+//                     res.status(200).json({ message: '已成功创建账号' });
+//                 }
+//             });
+//         }
+
+//     })
+// });
+
+router.post('/teacher', jwt({ secret: config.token_secret }), function(req, res) {
+    var user = req.user;
+    if (user.role != "管理员") {
+        res.status(401).json({ message: "无权限创建教师账号" });
+    }
     var data = req.body;
     User.find({ username: data.username }, function(err, users) {
         if (users.length > 0) {
-            res.status(400).send('系统中已存在该账号');
+            res.status(400).json({ message: '系统中已存在该账号' });
         } else {
-            User.register(new User({ username: data.username, name: data.name, role: data.role }), data.password, function(err, user) {
+            var expired_at = new Date("2030-12-31");
+            User.register(new User({ username: data.username, name: data.name, role: "老师", init_password: data.password, expired_at: expired_at }), data.password, function(err, user) {
                 if (err) {
                     logger.error(err);
-                    res.status(500).send(err);
+                    res.status(500).json({ message: err });
                 } else {
-                    res.status(200).json({ message: '已成功创建账号' });
+                    logger.info(user.name + " 创建了教师账号：" + data.username);
+                    res.status(200).json({ message: '已成功创建教师员账号' });
                 }
             });
         }
@@ -83,32 +121,91 @@ router.post('/', jwt({ secret: config.token_secret }), function(req, res) {
     })
 });
 
+router.post('/student', jwt({ secret: config.token_secret }), function(req, res) {
+    var user = req.user;
+    if (user.role == "学员") {
+        res.status(401).json({ message: "无权限创建学员账号" });
+    }
+    var data = req.body;
+    User.find({ username: data.username }, function(err, users) {
+        if (users.length > 0) {
+            res.status(400).json({ message: '系统中已存在该账号' });
+        } else {
+            User.register(new User({ teacher: user._id, username: data.username, name: data.name, role: "学员", init_password: data.password }), data.password, function(err, user) {
+                if (err) {
+                    logger.error(err);
+                    res.status(500).send(err);
+                } else {
+                    logger.info(user.name + " 创建了学员账号：" + data.username);
+                    res.status(200).json({ message: '已成功创建学员账号' });
+                }
+            });
+        }
+
+    })
+});
+
+
 router.delete('/:id', jwt({ secret: config.token_secret }), function(req, res) {
     User.remove({ _id: req.params.id }, function(err, user) {
         if (err) {
             logger.error(err);
-            res.send(err);
+            res.status(500).json({ message: err });
         }
         logger.info(req.user.name + " 删除了 " + req.params.id + " 的账号" + req.clientIP);
         res.json({ message: '账号已成功删除' });
     });
 });
 
-router.get('/', jwt({ secret: config.token_secret }), function(req, res, next) {
-    var query = {};
-    var role = req.query.role;
-    if (role == "teacher") {
-        query = { role: '老师' };
-    } else if (role == "student") {
-        query = { role: '学员' };
+// router.get('/', jwt({ secret: config.token_secret }), function(req, res, next) {
+//     var query = {};
+//     var user = req.user;
+//     if (user.role == "teacher") {
+//         query = { role: '老师' };
+//     } else if (role == "student") {
+//         query = { role: '学员' };
+//     }
+//     User.find(query)
+//         .exec()
+//         .then(function(users) {
+//                 res.json(users);
+//             },
+//             function(err) {
+//                 res.status(500).json({ message: err });
+//             }
+//         )
+// });
+
+router.get('/teachers', jwt({ secret: config.token_secret }), function(req, res, next) {
+    var user = req.user;
+    if (user.role != "管理员") {
+        res.status(401).json({ message: "无权限查看教师账号" });
     }
+    var query = { role: "老师" };
     User.find(query)
         .exec()
         .then(function(users) {
                 res.json(users);
             },
             function(err) {
-                res.status(500).send(err);
+                res.status(500).json({ message: err });
+            }
+        )
+});
+
+router.get('/students', jwt({ secret: config.token_secret }), function(req, res, next) {
+    var user = req.user;
+    if (user.role == "学员") {
+        res.status(401).json({ message: "无权限查看学员账号" });
+    }
+    var query = { teacher: user._id, role: "学员" };
+    User.find(query)
+        .exec()
+        .then(function(users) {
+                res.json(users);
+            },
+            function(err) {
+                res.status(500).json({ message: err });
             }
         )
 });
@@ -120,7 +217,7 @@ router.get('/:id', jwt({ secret: config.token_secret }), function(req, res) {
             res.status(200).json(user);
         }, function(err) {
             logger.error(err);
-            res.status(500).send(err);
+            res.status(500).json({ message: err });
         });
 });
 
@@ -135,7 +232,7 @@ router.put('/:id', jwt({ secret: config.token_secret }), function(req, res) {
             user.save(function(err) {
                 if (err) {
                     logger.error(err);
-                    res.send(err);
+                    res.status(500).json({ message: err });
                 }
 
                 logger.info(req.user.name + " 更新了用户账号，用户名为：" + user.username + "。" + req.clientIP);

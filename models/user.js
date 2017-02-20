@@ -6,8 +6,11 @@ var passportLocalMongoose = require('passport-local-mongoose');
 var schema = new mongoose.Schema({
     username: String,
     password: String,
+    init_password: String,
     name: String,
     role: String,
+    teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    expired_at: { type: Date },
     created_at: { type: Date },
     updated_at: { type: Date }
 });
