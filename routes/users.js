@@ -214,6 +214,7 @@ router.get('/students', jwt({ secret: config.token_secret }), function(req, res,
         .populate('teacher')
         .exec()
         .then(function(data) {
+                console.log(data);
                 var students = data.map(item => {
                     var student = {};
                     student._id = item._id;
@@ -221,7 +222,9 @@ router.get('/students', jwt({ secret: config.token_secret }), function(req, res,
                     student.name = item.name;
                     student.password = item.init_password;
                     student.expired_at = item.expired_at;
-                    student.teacher = item.teacher.name;
+                    if (item.teacher) {
+                        student.teacher = item.teacher.name;
+                    }
                     if (!item.expired_at) {
                         student.status = "未激活";
                     } else if (item.expired_at > Date.now()) {
@@ -231,7 +234,7 @@ router.get('/students', jwt({ secret: config.token_secret }), function(req, res,
                     }
                     return student;
                 })
-                res.json(students);
+                res.status(200).json(students);
             },
             function(err) {
                 res.status(500).json({ message: err });
