@@ -214,6 +214,7 @@ router.get('/students', jwt({ secret: config.token_secret }), function(req, res,
         // .populate('teacher')
         .exec()
         .then(function(data) {
+                console.log(data);
                 var students = data.map(item => {
                     var student = {};
                     student._id = item._id;
