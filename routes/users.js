@@ -211,7 +211,7 @@ router.get('/students', jwt({ secret: config.token_secret }), function(req, res,
         query = { teacher: user._id, role: "学员" };
     }
     User.find(query)
-        // .populate('teacher')
+        .populate('teacher')
         .exec()
         .then(function(data) {
                 console.log(data);
@@ -224,7 +224,6 @@ router.get('/students', jwt({ secret: config.token_secret }), function(req, res,
                     student.expired_at = item.expired_at;
                     if (item.teacher) {
                         student.teacher = item.teacher.name;
-                        // student.teacher = item.teacher.name;
                     }
                     if (!item.expired_at) {
                         student.status = "未激活";
