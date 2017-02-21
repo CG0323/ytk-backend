@@ -184,8 +184,16 @@ router.get('/teachers', jwt({ secret: config.token_secret }), function(req, res,
     var query = { role: "老师" };
     User.find(query)
         .exec()
-        .then(function(users) {
-                res.json(users);
+        .then(function(data) {
+                var teachers = data.map(item => {
+                    var teacher = {};
+                    teacher._id = item._id;
+                    teacher.username = item.username;
+                    teacher.name = item.name;
+                    teacher.password = item.init_password;
+                    return teacher;
+                })
+                res.json(teachers);
             },
             function(err) {
                 res.status(500).json({ message: err });
@@ -205,8 +213,25 @@ router.get('/students', jwt({ secret: config.token_secret }), function(req, res,
     User.find(query)
         .populate('teacher')
         .exec()
-        .then(function(users) {
-                res.json(users);
+        .then(function(data) {
+                var students = data.map(item => {
+                    var student = {};
+                    student._id = item._id;
+                    student.username = item.username;
+                    student.name = item.name;
+                    student.password = item.init_password;
+                    student.expired_at = item.expired_at;
+                    student.teacher = item.teacher.name;
+                    if (!item.expired_at) {
+                        student.status = "未激活";
+                    } else if (item.expired_at > Date.now()) {
+                        student.status = "已过期";
+                    } else {
+                        student.status = "已激活";
+                    }
+                    return student;
+                })
+                res.json(students);
             },
             function(err) {
                 res.status(500).json({ message: err });
