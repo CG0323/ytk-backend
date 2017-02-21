@@ -127,16 +127,16 @@ router.post('/student', jwt({ secret: config.token_secret }), function(req, res)
         res.status(401).json({ message: "无权限创建学员账号" });
     }
     var data = req.body;
-    console.log(user._id);
     User.find({ username: data.username }, function(err, users) {
         if (users.length > 0) {
             res.status(400).json({ message: '系统中已存在该账号' });
         } else {
-            User.register(new User({ teacher: user._id, username: data.username, name: data.name, role: "学员", init_password: data.password }), data.password, function(err, user) {
+            User.register(new User({ teacher: user._id, username: data.username, name: data.name, role: "学员", init_password: data.password }), data.password, function(err, savedUser) {
                 if (err) {
                     logger.error(err);
                     res.status(500).send(err);
                 } else {
+                    console.log(savedUser);
                     logger.info(user.name + " 创建了学员账号：" + data.username);
                     res.status(200).json({ message: '已成功创建学员账号' });
                 }
@@ -215,7 +215,6 @@ router.get('/students', jwt({ secret: config.token_secret }), function(req, res,
         .populate('teacher')
         .exec()
         .then(function(data) {
-                console.log(data);
                 var students = data.map(item => {
                     var student = {};
                     student._id = item._id;
