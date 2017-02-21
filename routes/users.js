@@ -127,6 +127,7 @@ router.post('/student', jwt({ secret: config.token_secret }), function(req, res)
         res.status(401).json({ message: "无权限创建学员账号" });
     }
     var data = req.body;
+    console.log(user._id);
     User.find({ username: data.username }, function(err, users) {
         if (users.length > 0) {
             res.status(400).json({ message: '系统中已存在该账号' });
