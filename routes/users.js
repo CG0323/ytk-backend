@@ -104,7 +104,7 @@ router.post('/teacher', jwt({ secret: config.token_secret }), function(req, res)
     var data = req.body;
     User.find({ username: data.username }, function(err, users) {
         if (users.length > 0) {
-            res.status(400).json({ message: '系统中已存在该账号' });
+            res.status(400).json({ message: '用户名已被使用' });
         } else {
             var expired_at = new Date("2030-12-31");
             User.register(new User({ username: data.username, name: data.name, role: "老师", init_password: data.password, expired_at: expired_at }), data.password, function(err, user) {
@@ -129,7 +129,7 @@ router.post('/student', jwt({ secret: config.token_secret }), function(req, res)
     var data = req.body;
     User.find({ username: data.username }, function(err, users) {
         if (users.length > 0) {
-            res.status(400).json({ message: '系统中已存在该账号' });
+            res.status(400).json({ message: '用户名已被使用' });
         } else {
             User.register(new User({ teacher: user._id, username: data.username, name: data.name, role: "学员", init_password: data.password }), data.password, function(err, savedUser) {
                 if (err) {
@@ -214,7 +214,6 @@ router.get('/students', jwt({ secret: config.token_secret }), function(req, res,
         .populate('teacher')
         .exec()
         .then(function(data) {
-                console.log(data);
                 var students = data.map(item => {
                     var student = {};
                     student._id = item._id;
