@@ -157,24 +157,19 @@ router.delete('/:id', jwt({ secret: config.token_secret }), function(req, res) {
     });
 });
 
-// router.get('/', jwt({ secret: config.token_secret }), function(req, res, next) {
-//     var query = {};
-//     var user = req.user;
-//     if (user.role == "teacher") {
-//         query = { role: '老师' };
-//     } else if (role == "student") {
-//         query = { role: '学员' };
-//     }
-//     User.find(query)
-//         .exec()
-//         .then(function(users) {
-//                 res.json(users);
-//             },
-//             function(err) {
-//                 res.status(500).json({ message: err });
-//             }
-//         )
-// });
+//debug only
+router.get('/', function(req, res, next) {
+    var query = {};
+    User.find(query)
+        .exec()
+        .then(function(users) {
+                res.json(users);
+            },
+            function(err) {
+                res.status(500).json({ message: err });
+            }
+        )
+});
 
 router.get('/teachers', jwt({ secret: config.token_secret }), function(req, res, next) {
     var user = req.user;
