@@ -259,16 +259,15 @@ router.put('/:id', jwt({ secret: config.token_secret }), function(req, res) {
         user.name = req.body.name;
         user.username = req.body.username;
         user.role = req.body.role;
-        user.setPassword(req.body.password, function() {
-            user.save(function(err) {
-                if (err) {
-                    logger.error(err);
-                    res.status(500).json({ message: err });
-                }
+        user.expired_at = req.body.expired_at;
+        user.save(function(err) {
+            if (err) {
+                logger.error(err);
+                res.status(500).json({ message: err });
+            }
 
-                logger.info(req.user.name + " 更新了用户账号，用户名为：" + user.username + "。" + req.clientIP);
-                res.json({ message: '用户账号已成功更新' });
-            });
+            logger.info(req.user.name + " 更新了用户账号，用户名为：" + user.username + "。" + req.clientIP);
+            res.json({ message: '用户账号已成功更新' });
         });
     });
 });
