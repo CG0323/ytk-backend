@@ -46,18 +46,6 @@ router.get('/register-teacher2', function(req, res) {
 });
 
 // 临时接口
-router.get('/register-student', function(req, res) {
-    User.register(new User({ username: config.student_username, name: 'cowboy', role: '学员', init_password: config.student_password }), config.student_password, function(err, user) {
-        if (err) {
-            logger.error(err);
-            res.status(500).send(err);
-        } else {
-            res.status(200).json({ status: '学员注册成功' });
-        }
-    });
-});
-
-// 临时接口
 router.get('/clear', function(req, res, next) {
     User.remove()
         .exec()
@@ -75,18 +63,33 @@ router.post('/login', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
         if (err) {
             logger.error(err);
-            return res.status(500).send(err);
+            return res.status(500).json({ message: err });
         }
         if (!user) {
-            return res.status(401).send("用户名或密码错误");
+            return res.status(401).json({ message: "用户名或密码错误" });
         }
-        var secret = config.token_secret;
-        var token = jwt_generator.sign({ _id: user._id, name: user.name, role: user.role }, secret, { expiresIn: '7d' });
-        logger.info(user.name + " 登录系统。" + req.clientIP);
-        res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token });
-
+        var expired_at = user.expired_at;
+        if (!expired_at) {
+            return res.status(401).json({ message: "账号尚未激活，请联系老师" });
+        } else if (expired_at < new Date()) {
+            return res.status(401).json({ message: "账号已过期，请联系老师" });
+        } else {
+            var secret = config.token_secret;
+            var token = jwt_generator.sign({ _id: user._id, name: user.name, role: user.role }, secret, { expiresIn: '1d' });
+            logger.info(user.name + " 登录系统。" + req.clientIP);
+            res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token });
+        }
     })(req, res, next);
 });
+
+router.get('/token', jwt({ secret: config.token_secret }), function(req, res) {
+    var user = req.user;
+    var secret = config.token_secret;
+    var token = jwt_generator.sign({ _id: user._id, name: user.name, role: user.role }, secret, { expiresIn: '1d' });
+    res.status(200).json({ token: token });
+});
+
+
 
 
 // router.post('/', jwt({ secret: config.token_secret }), function(req, res) {
