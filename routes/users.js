@@ -221,7 +221,7 @@ router.get('/students', jwt({ secret: config.token_secret }), function(req, res,
                     }
                     if (!item.expired_at) {
                         student.status = "未激活";
-                    } else if (item.expired_at > Date.now()) {
+                    } else if (item.expired_at < Date.now()) {
                         student.status = "已过期";
                     } else {
                         student.status = "已激活";
