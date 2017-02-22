@@ -253,7 +253,6 @@ router.put('/:id', jwt({ secret: config.token_secret }), function(req, res) {
             res.send(err);
         user.name = req.body.name;
         user.username = req.body.username;
-        user.role = req.body.role;
         user.expired_at = req.body.expired_at;
         user.save(function(err) {
             if (err) {
