@@ -77,7 +77,7 @@ router.post('/login', function(req, res, next) {
             var secret = config.token_secret;
             var token = jwt_generator.sign({ _id: user._id, username: user.username, name: user.name, role: user.role, expired_at: user.expired_at }, secret, { expiresIn: '24h' });
             logger.info(user.name + " 登录系统。" + req.clientIP);
-            res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token });
+            res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at });
         }
     })(req, res, next);
 });
