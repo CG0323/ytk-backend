@@ -273,11 +273,8 @@ router.put('/:id', jwt({ secret: config.token_secret }), function(req, res) {
 });
 
 router.post('/changepsw', jwt({ secret: config.token_secret }), function(req, res) {
-    console.log(req.user);
-    console.log(req.body.password);
     User.authenticate()(req.user.username, req.body.password, function(err, user, options) {
         if (err) {
-            console.log(err);
             res.status(400).json({ message: '旧密码错误' });
         } else if (user === false) {
             res.status(400).json({ message: '旧密码错误' });
