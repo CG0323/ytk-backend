@@ -140,10 +140,10 @@ router.post('/student', jwt({ secret: config.token_secret }), function(req, res)
             User.register(new User({ teacher: user._id, username: data.username, name: data.name, role: "学员", init_password: data.password }), data.password, function(err, savedUser) {
                 if (err) {
                     logger.error(err);
-                    res.status(500).send(err);
+                    res.status(500).json({ message: err });
                 } else {
                     logger.info(user.name + " 创建了学员账号：" + data.username);
-                    res.status(200).json({ message: '已成功创建学员账号' });
+                    res.status(200).json({ message: '已成功创建学员账号', user: savedUser });
                 }
             });
         }
