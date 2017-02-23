@@ -273,7 +273,7 @@ router.put('/:id', jwt({ secret: config.token_secret }), function(req, res) {
 });
 
 router.post('/changepsw', jwt({ secret: config.token_secret }), function(req, res) {
-    console.log(req.user.username);
+    console.log(req.user);
     console.log(req.body.password);
     User.authenticate()(req.user.username, req.body.password, function(err, user, options) {
         if (err) {
