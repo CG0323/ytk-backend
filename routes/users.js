@@ -75,7 +75,7 @@ router.post('/login', function(req, res, next) {
             return res.status(401).json({ message: "账号已过期，请联系老师" });
         } else {
             var secret = config.token_secret;
-            var token = jwt_generator.sign({ _id: user._id, name: user.name, role: user.role, expired_at: user.expired_at }, secret, { expiresIn: '24h' });
+            var token = jwt_generator.sign({ _id: user._id, username: user.username, name: user.name, role: user.role, expired_at: user.expired_at }, secret, { expiresIn: '24h' });
             logger.info(user.name + " 登录系统。" + req.clientIP);
             res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token });
         }
@@ -95,7 +95,7 @@ router.get('/token', jwt({ secret: config.token_secret }), function(req, res) {
         if (user_expired_in < 24) {
             expiresIn = Math.floor(user_expired_in) + 'h';
         }
-        var token = jwt_generator.sign({ _id: user._id, name: user.name, role: user.role }, secret, { expiresIn: expiresIn });
+        var token = jwt_generator.sign({ _id: user._id, username: user.username, name: user.name, role: user.role }, secret, { expiresIn: expiresIn });
         res.status(200).json({ token: token });
     });
 
