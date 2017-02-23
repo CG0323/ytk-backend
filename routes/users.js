@@ -280,6 +280,7 @@ router.post('/changepsw', jwt({ secret: config.token_secret }), function(req, re
             res.status(400).json({ message: '旧密码错误' });
         } else {
             user.setPassword(req.body.newPassword, function() {
+                user.init_password = "已修改";
                 user.save(function(err) {
                     if (err) {
                         logger.error(err);
