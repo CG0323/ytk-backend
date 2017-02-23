@@ -272,4 +272,25 @@ router.put('/:id', jwt({ secret: config.token_secret }), function(req, res) {
     });
 });
 
+router.post('/changepsw', jwt({ secret: config.token_secret }), function(req, res) {
+    User.authenticate()(req.user.username, req.body.password, function(err, user, options) {
+        if (err) {
+            res.status(400).send('旧密码错误');
+        } else if (user === false) {
+            res.status(400).send('旧密码错误');
+        } else {
+            user.setPassword(req.body.newPassword, function() {
+                user.save(function(err) {
+                    if (err) {
+                        logger.error(err);
+                        res.status(400).send('密码修改失败');
+                    }
+                    logger.info(user.name + " 修改了密码。" + req.clientIP);
+                    res.status(200).json({ message: '用户密码已成功更新' });
+                });
+            });
+        }
+    });
+});
+
 module.exports = router;
