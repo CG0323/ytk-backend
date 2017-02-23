@@ -143,7 +143,7 @@ router.post('/student', jwt({ secret: config.token_secret }), function(req, res)
                     res.status(500).json({ message: err });
                 } else {
                     logger.info(user.name + " 创建了学员账号：" + data.username);
-                    res.status(200).json({ message: '已成功创建学员账号', user: savedUser });
+                    res.status(200).json({ message: '已成功创建学员账号', user: { _id: savedUser._id, username: savedUser.username, name: savedUser.name, password: savedUser.init_password, teacher: savedUser.teacher } });
                 }
             });
         }
