@@ -24,29 +24,27 @@ router.get('/', wechat(config.wechat.token, function(req, res, next) {
 }));
 
 router.post('/', wechat(config.wechat.token, wechat.text(function(message, req, res, next) {
-        var openId = message.FromUserName;
-        var text = message.Content;
-        if (text == '我叫什么') {
-            api.getUser(openId, function(err, data) {
-                if (err) {
+    var openId = message.FromUserName;
+    var text = message.Content;
+    if (text == '我叫什么') {
+        api.getUser(openId, function(err, data) {
+            if (err) {
 
-                } else {
-                    var nickname = data.nickname;
-                    res.reply("你叫" + nickname + "嘛。");
-                }
-            });
-        } else if (text == '我是谁') {
-            api.getUser(openId, function(err, data) {
-                if (err) {
+            } else {
+                var nickname = data.nickname;
+                res.reply("你叫" + nickname + "嘛。");
+            }
+        });
+    } else if (text == '我是谁') {
+        api.getUser(openId, function(err, data) {
+            if (err) {
 
-                } else {
-                    var remark = data.remark;
-                    res.reply("你是" + remark + "。");
-                }
-            });
-        }
-    })
-
-));
+            } else {
+                var remark = data.remark;
+                res.reply("你是" + remark + "。");
+            }
+        });
+    }
+})));
 
 module.exports = router;
