@@ -1,12 +1,5 @@
 'use strict';
 
-function generate() {
-    var now = new Date();
-    var prefix = (now.toISOString().replace(/[-T:Z\.]/g, '').substr(0, 16)).toString();
-    var random = random(4);
-    return prefix + random;
-}
-
 function random(length) {
     if (length === 0) return null;
 
@@ -18,5 +11,14 @@ function random(length) {
 
     return base + Math.floor(Math.random() * fill);
 }
+
+function generate() {
+    var now = new Date();
+    var prefix = (now.toISOString().replace(/[-T:Z\.]/g, '').substr(0, 16)).toString();
+    var random = random(4);
+    return prefix + random;
+}
+
+
 
 module.exports.generate = generate;
