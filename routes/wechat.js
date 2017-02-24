@@ -16,3 +16,5 @@ router.get('/', wechat(config.wechat.token, function(req, res, next) {
     res.writeHead(200);
     res.end('hello from node api');
 }));
+
+module.exports = router;
