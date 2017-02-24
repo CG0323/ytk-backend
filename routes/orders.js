@@ -12,22 +12,18 @@ router.post('/prepare', jwt({ secret: config.token_secret }), function(req, res)
     res.status(200).json({ orderNo: orderNo });
 });
 
-function random(length) {
-    if (length === 0) return null;
-
-    var total = 1;
-    for (let i = 0; i < length; i++) total *= 10;
-
-    const base = total - total / 10,
-        fill = total - base - 1;
-
-    return base + Math.floor(Math.random() * fill);
-}
 
 function generateOrderNo() {
     var now = new Date();
     var prefix = (now.toISOString().replace(/[-T:Z\.]/g, '').substr(0, 16)).toString();
-    var random = random(4);
+    var total = 1;
+    for (let i = 0; i < 4; i++) {
+        total *= 10;
+    }
+    var base = total - total / 10;
+    var fill = total - base - 1;
+
+    var random = base + Math.floor(Math.random() * fill);
     return prefix + random;
 }
 
