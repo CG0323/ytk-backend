@@ -1,8 +1,8 @@
 'use strict';
 
 function generate() {
-    var now = new Date(),
-        var prefix = (now.toISOString().replace(/[-T:Z\.]/g, '').substr(0, 16)).toString();
+    var now = new Date();
+    var prefix = (now.toISOString().replace(/[-T:Z\.]/g, '').substr(0, 16)).toString();
     var random = random(4);
     return prefix + random;
 }
