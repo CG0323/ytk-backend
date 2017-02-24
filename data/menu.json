@@ -1,0 +1,13 @@
+{
+    "button": [{
+            "type": "view",
+            "name": "做题软件",
+            "url": "http://60.205.216.128:5555"
+        },
+        {
+            "type": "view",
+            "name": "证书查询",
+            "url": "http://60.205.216.128/wechat/certificate"
+        }
+    ]
+}
