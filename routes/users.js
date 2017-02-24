@@ -108,9 +108,9 @@ router.post('/teacher', jwt({ secret: config.token_secret }), function(req, res)
         res.status(401).json({ message: "无权限创建教师账号" });
     }
     var data = req.body;
-    User.find({ username: data.username }, function(err, users) {
+    User.find({"$or":[{ username: data.username },{name:data.name}]}, function(err, users) {
         if (users.length > 0) {
-            res.status(400).json({ message: '用户名已被使用' });
+            res.status(400).json({ message: '用户名或教师姓名已被使用' });
         } else {
             var expired_at = new Date("2030-12-31");
             User.register(new User({ username: data.username, name: data.name, role: "老师", init_password: data.password, expired_at: expired_at }), data.password, function(err, user) {
