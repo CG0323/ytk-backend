@@ -9,6 +9,7 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var db = require('./utils/database.js').connection;
 var users = require('./routes/users');
+var wechat = require('./routes/wechat');
 var app = express()
 var jwt = require('express-jwt');
 var config = require('./common.js').config();
@@ -33,7 +34,7 @@ app.use(function(req, res, next) {
 
 app.use('/api', apis);
 app.use('/users', users);
-
+app.use('/wechat', wechat);
 
 // passport config
 var User = require('./models/user')(db);
