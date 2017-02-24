@@ -7,7 +7,7 @@
         {
             "type": "view",
             "name": "证书查询",
-            "url": "http://60.205.216.128/wechat/certificate"
+            "url": "http://60.205.216.128:5559/#/certificates/search"
         }
     ]
 }
