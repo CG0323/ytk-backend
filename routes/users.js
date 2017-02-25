@@ -78,7 +78,7 @@ router.post('/login', function(req, res, next) {
             var secret = generateSecret();
             user.last_key = secret;
             user.save(); // no check for now, not sure if it is ok
-            var token = jwt_generator.sign({ iss: user_id, _id: user._id, username: user.username, name: user.name, role: user.role, expired_at: user.expired_at }, secret, { expiresIn: '24h' });
+            var token = jwt_generator.sign({ iss: user._id, _id: user._id, username: user.username, name: user.name, role: user.role, expired_at: user.expired_at }, secret, { expiresIn: '24h' });
             logger.info(user.name + " 登录系统。" + req.clientIP);
             res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at });
         }
