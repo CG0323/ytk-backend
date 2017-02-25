@@ -306,7 +306,7 @@ function generateSecret() {
     var fill = total - base - 1;
 
     var random = base + Math.floor(Math.random() * fill);
-    return random;
+    return random.toString();
 }
 
 
