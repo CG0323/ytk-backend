@@ -5,7 +5,7 @@ var router = express.Router();
 var Q = require('q');
 var config = require('../common.js').config();
 var jwt = require('express-jwt');
-var secrectCallback = require('../utils/secrectCallback.js').secretCallback;
+var secretCallback = require('../utils/secrectCallback.js').secretCallback;
 
 router.post('/', jwt({ secret: secretCallback }), function(req, res) {
     var user = req.user;

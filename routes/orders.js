@@ -5,7 +5,7 @@ var Q = require('q');
 var jwt = require('express-jwt');
 var config = require('../common.js').config();
 var logger = require('../utils/logger.js');
-var secrectCallback = require('../utils/secrectCallback.js').secretCallback;
+var secretCallback = require('../utils/secrectCallback.js').secretCallback;
 
 router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
     var orderNo = generateOrderNo();
