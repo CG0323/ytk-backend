@@ -58,6 +58,7 @@ router.get('/', jwt({ secret: secretCallback }), function(req, res, next) {
 
 router.get('/withcontent', jwt({ secret: secretCallback }), function(req, res, next) {
     var user = req.user;
+    console.log(user);
     WrongRecord.find({ user: user.iss })
         .deepPopulate('problem.parent.parent.parent')
         .exec()
