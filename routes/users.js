@@ -13,7 +13,7 @@ var secretCallback = require('../utils/secretCallback.js').secretCallback;
 
 router.get('/me', jwt({ secret: secretCallback }), function(req, res) {
     User.findOne({ _id: req.user._id })
-        .populate('teacher')
+        .populate({ path: 'teacher', select: { _id: 1, name: 1 } })
         .exec()
         .then(function(user) {
             res.status(200).json({ _id: user._id, username: user.username, name: user.name, role: user.role, teacher: user.teacher, expired_at: user.expired_at });
