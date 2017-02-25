@@ -12,7 +12,7 @@ var secretCallback = require('../utils/secretCallback.js').secretCallback;
 
 
 router.get('/me', jwt({ secret: secretCallback }), function(req, res) {
-    User.findOne({ _id: req.user._id })
+    User.findOne({ _id: req.user.iss })
         .populate({ path: 'teacher', select: { _id: 1, name: 1 } })
         .exec()
         .then(function(user) {
@@ -99,7 +99,7 @@ router.post('/login', function(req, res, next) {
 });
 
 router.get('/token', jwt({ secret: secretCallback }), function(req, res) {
-    var userId = req.user._id;
+    var userId = req.user.iss;
     User.findById(userId, function(err, user) {
         if (err) {
             logger.error(err);
@@ -155,7 +155,7 @@ router.post('/student', jwt({ secret: secretCallback }), function(req, res) {
         } else {
             var expired_at = moment().add(15, 'days');
 
-            User.register(new User({ teacher: user._id, username: data.username, name: data.name, role: "学员", init_password: data.password, expired_at: expired_at }), data.password, function(err, savedUser) {
+            User.register(new User({ teacher: user.iss, username: data.username, name: data.name, role: "学员", init_password: data.password, expired_at: expired_at }), data.password, function(err, savedUser) {
                 if (err) {
                     logger.error(err);
                     res.status(500).json({ message: err });
@@ -227,7 +227,7 @@ router.get('/students', jwt({ secret: secretCallback }), function(req, res, next
     }
     var query = { role: "学员" };
     if (user.role == "老师") {
-        query = { teacher: user._id, role: "学员" };
+        query = { teacher: user.iss, role: "学员" };
     }
     User.find(query)
         .populate('teacher')
@@ -291,25 +291,30 @@ router.put('/:id', jwt({ secret: secretCallback }), function(req, res) {
 });
 
 router.post('/changepsw', jwt({ secret: secretCallback }), function(req, res) {
-    User.authenticate()(req.user.username, req.body.password, function(err, user, options) {
-        if (err) {
-            res.status(400).json({ message: '旧密码错误' });
-        } else if (user === false) {
-            res.status(400).json({ message: '旧密码错误' });
-        } else {
-            user.setPassword(req.body.newPassword, function() {
-                user.init_password = "已修改";
-                user.save(function(err) {
-                    if (err) {
-                        logger.error(err);
-                        res.status(400).json({ message: '密码修改失败' });
-                    }
-                    logger.info(user.name + " 修改了密码。" + req.clientIP);
-                    res.status(200).json({ message: '用户密码已成功更新' });
+    User.findById(req.user.iss, function(err, user1) {
+        if (err)
+            res.status(500).json({ message: err });
+        User.authenticate()(user1.username, req.body.password, function(err, user, options) {
+            if (err) {
+                res.status(400).json({ message: '旧密码错误' });
+            } else if (user === false) {
+                res.status(400).json({ message: '旧密码错误' });
+            } else {
+                user.setPassword(req.body.newPassword, function() {
+                    user.init_password = "已修改";
+                    user.save(function(err) {
+                        if (err) {
+                            logger.error(err);
+                            res.status(400).json({ message: '密码修改失败' });
+                        }
+                        logger.info(user.name + " 修改了密码。" + req.clientIP);
+                        res.status(200).json({ message: '用户密码已成功更新' });
+                    });
                 });
-            });
-        }
+            }
+        });
     });
+
 });
 
 function generateSecret() {

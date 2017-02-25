@@ -12,7 +12,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
     var data = req.body;
     var correct = data.correct;
     if (correct) { // remove from database if exist
-        WrongRecord.remove({ user: user._id, problem: data.problem })
+        WrongRecord.remove({ user: user.iss, problem: data.problem })
             .exec()
             .then(function(data) {
                     res.json({ message: "错题记录已成功删除" });
@@ -44,7 +44,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
 
 router.get('/', jwt({ secret: secretCallback }), function(req, res, next) {
     var user = req.user;
-    WrongRecord.find({ user: user._id })
+    WrongRecord.find({ user: user.iss })
         .exec()
         .then(function(records) {
                 var problems = records.map(rec => rec.problem);
@@ -58,7 +58,7 @@ router.get('/', jwt({ secret: secretCallback }), function(req, res, next) {
 
 router.get('/withcontent', jwt({ secret: secretCallback }), function(req, res, next) {
     var user = req.user;
-    WrongRecord.find({ user: user._id })
+    WrongRecord.find({ user: user.iss })
         .deepPopulate('problem.parent.parent.parent')
         .exec()
         .then(function(records) {
