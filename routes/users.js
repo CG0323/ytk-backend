@@ -140,7 +140,9 @@ router.post('/student', jwt({ secret: secretCallback }), function(req, res) {
         if (users.length > 0) {
             res.status(400).json({ message: '用户名已被使用' });
         } else {
-            User.register(new User({ teacher: user._id, username: data.username, name: data.name, role: "学员", init_password: data.password }), data.password, function(err, savedUser) {
+            var expired_at = moment().add(15, 'days');
+
+            User.register(new User({ teacher: user._id, username: data.username, name: data.name, role: "学员", init_password: data.password, expired_at: expired_at }), data.password, function(err, savedUser) {
                 if (err) {
                     logger.error(err);
                     res.status(500).json({ message: err });
