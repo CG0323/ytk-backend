@@ -8,7 +8,7 @@ var config = require('../common.js').config();
 var jwt_generator = require('jsonwebtoken');
 var jwt = require('express-jwt');
 var moment = require('moment');
-var secrectCallback = require('secrectCallback.js').secretCallback;
+var secrectCallback = require('../utils/secrectCallback.js').secretCallback;
 
 // 临时接口
 router.get('/register-admin', function(req, res) {
