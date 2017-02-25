@@ -10,6 +10,19 @@ var jwt = require('express-jwt');
 var moment = require('moment');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
 
+
+router.get('/me', jwt({ secret: secretCallback }), function(req, res) {
+    User.findOne({ _id: req.user._id })
+        .populate('teacher')
+        .exec()
+        .then(function(user) {
+            res.status(200).json({ _id: user._id, username: user.username, name: user.name, role: user.role, teacher: user.teacher, expired_at: user.expired_at });
+        }, function(err) {
+            logger.error(err);
+            res.status(500).json({ message: err });
+        });
+});
+
 // 临时接口
 router.get('/register-admin', function(req, res) {
     User.register(new User({ username: config.admin_username, name: '管理员', role: '管理员', expired_at: new Date("2030-12-31") }), config.admin_password, function(err, user) {
