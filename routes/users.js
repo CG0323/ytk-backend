@@ -91,7 +91,8 @@ router.post('/login', function(req, res, next) {
             var secret = generateSecret();
             user.last_key = secret;
             user.save(); // no check for now, not sure if it is ok
-            var token = jwt_generator.sign({ iss: user._id, _id: user._id, username: user.username, name: user.name, role: user.role, expired_at: user.expired_at }, secret, { expiresIn: '24h' });
+            // var token = jwt_generator.sign({ iss: user._id, _id: user._id, username: user.username, name: user.name, role: user.role, expired_at: user.expired_at }, secret, { expiresIn: '24h' });
+            var token = jwt_generator.sign({ iss: user._id, role: user.role }, secret, { expiresIn: '24h' });
             logger.info(user.name + " 登录系统。" + req.clientIP);
             res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at });
         }
@@ -111,7 +112,8 @@ router.get('/token', jwt({ secret: secretCallback }), function(req, res) {
         if (user_expired_in < 24) {
             expiresIn = Math.floor(user_expired_in) + 'h';
         }
-        var token = jwt_generator.sign({ iss: user_id, _id: user._id, username: user.username, name: user.name, role: user.role }, secret, { expiresIn: expiresIn });
+        // var token = jwt_generator.sign({ iss: user_id, _id: user._id, username: user.username, name: user.name, role: user.role }, secret, { expiresIn: expiresIn });
+        var token = jwt_generator.sign({ iss: user_id, role: user.role }, secret, { expiresIn: expiresIn });
         res.status(200).json({ token: token });
     });
 
@@ -176,7 +178,7 @@ router.delete('/:id', jwt({ secret: secretCallback }), function(req, res) {
             logger.error(err);
             res.status(500).json({ message: err });
         }
-        logger.info(req.user.name + " 删除了 " + req.params.id + " 的账号" + req.clientIP);
+        logger.info(req.user.iss + " 删除了 " + req.params.id + " 的账号" + req.clientIP);
         res.json({ message: '账号已成功删除' });
     });
 });
@@ -284,7 +286,7 @@ router.put('/:id', jwt({ secret: secretCallback }), function(req, res) {
                 res.status(500).json({ message: err });
             }
 
-            logger.info(req.user.name + " 更新了用户账号，用户名为：" + user.username + "。" + req.clientIP);
+            logger.info(req.user.iss + " 更新了用户账号，用户名为：" + user.username + "。" + req.clientIP);
             res.json({ message: '用户账号已成功更新' });
         });
     });
