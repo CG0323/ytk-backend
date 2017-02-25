@@ -4,7 +4,7 @@ var Problem = require('../models/problem')(db);
 var router = express.Router();
 var Q = require('q');
 var jwt = require('express-jwt');
-var secrectCallback = require('../utils/secrectCallback.js').secretCallback;
+var secretCallback = require('../utils/secretCallback.js').secretCallback;
 
 router.post('/', function(req, res) {
     var problem = new Problem(req.body);

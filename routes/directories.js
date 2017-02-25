@@ -3,7 +3,7 @@ var db = require('../utils/database.js').connection;
 var Directory = require('../models/directory.js')(db);
 var router = express.Router();
 var Q = require('q');
-var secretCallback = require('../utils/secrectCallback.js').secretCallback;
+var secretCallback = require('../utils/secretCallback.js').secretCallback;
 
 router.post('/', function(req, res) {
     var directory = new Directory(req.body);
