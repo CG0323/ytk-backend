@@ -5,8 +5,9 @@ var router = express.Router();
 var Q = require('q');
 var config = require('../common.js').config();
 var jwt = require('express-jwt');
+var secrectCallback = require('secrectCallback.js').secretCallback;
 
-router.post('/', jwt({ secret: config.token_secret }), function(req, res) {
+router.post('/', jwt({ secret: secretCallback }), function(req, res) {
     var user = req.user;
     var data = req.body;
     var correct = data.correct;
@@ -41,7 +42,7 @@ router.post('/', jwt({ secret: config.token_secret }), function(req, res) {
     }
 });
 
-router.get('/', jwt({ secret: config.token_secret }), function(req, res, next) {
+router.get('/', jwt({ secret: secretCallback }), function(req, res, next) {
     var user = req.user;
     WrongRecord.find({ user: user._id })
         .exec()
@@ -55,7 +56,7 @@ router.get('/', jwt({ secret: config.token_secret }), function(req, res, next) {
         )
 });
 
-router.get('/withcontent', jwt({ secret: config.token_secret }), function(req, res, next) {
+router.get('/withcontent', jwt({ secret: secretCallback }), function(req, res, next) {
     var user = req.user;
     WrongRecord.find({ user: user._id })
         .deepPopulate('problem.parent.parent.parent')

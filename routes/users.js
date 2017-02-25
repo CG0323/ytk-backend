@@ -8,6 +8,7 @@ var config = require('../common.js').config();
 var jwt_generator = require('jsonwebtoken');
 var jwt = require('express-jwt');
 var moment = require('moment');
+var secrectCallback = require('secrectCallback.js').secretCallback;
 
 // 临时接口
 router.get('/register-admin', function(req, res) {
@@ -74,41 +75,43 @@ router.post('/login', function(req, res, next) {
         } else if (expired_at < new Date()) {
             return res.status(401).json({ message: "账号已过期，请联系老师" });
         } else {
-            var secret = config.token_secret;
-            var token = jwt_generator.sign({ _id: user._id, username: user.username, name: user.name, role: user.role, expired_at: user.expired_at }, secret, { expiresIn: '24h' });
+            var secret = generateSecret();
+            user.last_key = secret;
+            user.save(); // no check for now, not sure if it is ok
+            var token = jwt_generator.sign({ iss: user_id, _id: user._id, username: user.username, name: user.name, role: user.role, expired_at: user.expired_at }, secret, { expiresIn: '24h' });
             logger.info(user.name + " 登录系统。" + req.clientIP);
             res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at });
         }
     })(req, res, next);
 });
 
-router.get('/token', jwt({ secret: config.token_secret }), function(req, res) {
+router.get('/token', jwt({ secret: secretCallback }), function(req, res) {
     var userId = req.user._id;
     User.findById(userId, function(err, user) {
         if (err) {
             logger.error(err);
             res.status(500).json({ message: err });
         }
-        var secret = config.token_secret;
+        var secret = user.last_key;
         var user_expired_in = (user.expired_at.getTime() - Date.now()) / 3600000; // in hours
         var expiresIn = '24h';
         if (user_expired_in < 24) {
             expiresIn = Math.floor(user_expired_in) + 'h';
         }
-        var token = jwt_generator.sign({ _id: user._id, username: user.username, name: user.name, role: user.role }, secret, { expiresIn: expiresIn });
+        var token = jwt_generator.sign({ iss: user_id, _id: user._id, username: user.username, name: user.name, role: user.role }, secret, { expiresIn: expiresIn });
         res.status(200).json({ token: token });
     });
 
 
 });
 
-router.post('/teacher', jwt({ secret: config.token_secret }), function(req, res) {
+router.post('/teacher', jwt({ secret: secretCallback }), function(req, res) {
     var user = req.user;
     if (user.role != "管理员") {
         res.status(401).json({ message: "无权限创建教师账号" });
     }
     var data = req.body;
-    User.find({"$or":[{ username: data.username },{name:data.name}]}, function(err, users) {
+    User.find({ "$or": [{ username: data.username }, { name: data.name }] }, function(err, users) {
         if (users.length > 0) {
             res.status(400).json({ message: '用户名或教师姓名已被使用' });
         } else {
@@ -127,7 +130,7 @@ router.post('/teacher', jwt({ secret: config.token_secret }), function(req, res)
     })
 });
 
-router.post('/student', jwt({ secret: config.token_secret }), function(req, res) {
+router.post('/student', jwt({ secret: secretCallback }), function(req, res) {
     var user = req.user;
     if (user.role == "学员") {
         res.status(401).json({ message: "无权限创建学员账号" });
@@ -152,7 +155,7 @@ router.post('/student', jwt({ secret: config.token_secret }), function(req, res)
 });
 
 
-router.delete('/:id', jwt({ secret: config.token_secret }), function(req, res) {
+router.delete('/:id', jwt({ secret: secretCallback }), function(req, res) {
     User.remove({ _id: req.params.id }, function(err, user) {
         if (err) {
             logger.error(err);
@@ -177,7 +180,7 @@ router.get('/', function(req, res, next) {
         )
 });
 
-router.get('/teachers', jwt({ secret: config.token_secret }), function(req, res, next) {
+router.get('/teachers', jwt({ secret: secretCallback }), function(req, res, next) {
     var user = req.user;
     if (user.role != "管理员") {
         res.status(401).json({ message: "无权限查看教师账号" });
@@ -202,7 +205,7 @@ router.get('/teachers', jwt({ secret: config.token_secret }), function(req, res,
         )
 });
 
-router.get('/students', jwt({ secret: config.token_secret }), function(req, res, next) {
+router.get('/students', jwt({ secret: secretCallback }), function(req, res, next) {
     var user = req.user;
     if (user.role == "学员") {
         res.status(401).json({ message: "无权限查看学员账号" });
@@ -242,7 +245,7 @@ router.get('/students', jwt({ secret: config.token_secret }), function(req, res,
         )
 });
 
-router.get('/:id', jwt({ secret: config.token_secret }), function(req, res) {
+router.get('/:id', jwt({ secret: secretCallback }), function(req, res) {
     User.findOne({ _id: req.params.id })
         .exec()
         .then(function(user) {
@@ -253,7 +256,7 @@ router.get('/:id', jwt({ secret: config.token_secret }), function(req, res) {
         });
 });
 
-router.put('/:id', jwt({ secret: config.token_secret }), function(req, res) {
+router.put('/:id', jwt({ secret: secretCallback }), function(req, res) {
     User.findById(req.params.id, function(err, user) {
         if (err)
             res.send(err);
@@ -272,7 +275,7 @@ router.put('/:id', jwt({ secret: config.token_secret }), function(req, res) {
     });
 });
 
-router.post('/changepsw', jwt({ secret: config.token_secret }), function(req, res) {
+router.post('/changepsw', jwt({ secret: secretCallback }), function(req, res) {
     User.authenticate()(req.user.username, req.body.password, function(err, user, options) {
         if (err) {
             res.status(400).json({ message: '旧密码错误' });
@@ -293,5 +296,18 @@ router.post('/changepsw', jwt({ secret: config.token_secret }), function(req, re
         }
     });
 });
+
+function generateSecret() {
+    var total = 1;
+    for (let i = 0; i < 6; i++) {
+        total *= 10;
+    }
+    var base = total - total / 10;
+    var fill = total - base - 1;
+
+    var random = base + Math.floor(Math.random() * fill);
+    return random;
+}
+
 
 module.exports = router;

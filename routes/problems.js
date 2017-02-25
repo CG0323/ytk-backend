@@ -3,6 +3,7 @@ var db = require('../utils/database.js').connection;
 var Problem = require('../models/problem')(db);
 var router = express.Router();
 var Q = require('q');
+var secrectCallback = require('secrectCallback.js').secretCallback;
 
 router.post('/', function(req, res) {
     var problem = new Problem(req.body);

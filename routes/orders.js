@@ -5,9 +5,9 @@ var Q = require('q');
 var jwt = require('express-jwt');
 var config = require('../common.js').config();
 var logger = require('../utils/logger.js');
-// var ordernumber = require('../utils/ordernumber.js');
+var secrectCallback = require('secrectCallback.js').secretCallback;
 
-router.post('/prepare', jwt({ secret: config.token_secret }), function(req, res) {
+router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
     var orderNo = generateOrderNo();
     res.status(200).json({ orderNo: orderNo });
 });
