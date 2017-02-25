@@ -17,7 +17,7 @@ router.post('/', function(req, res) {
     });
 });
 
-router.get('/', function(req, res, next) {
+router.get('/', jwt({ secret: secretCallback }), function(req, res, next) {
     Problem.find()
         .exec()
         .then(function(problems) {
@@ -29,7 +29,7 @@ router.get('/', function(req, res, next) {
         )
 });
 
-router.get('/directories/:id', function(req, res, next) {
+router.get('/directories/:id', jwt({ secret: secretCallback }), function(req, res, next) {
     Problem.find({ parent: req.params.id })
         .deepPopulate('parent.parent.parent')
         .exec()
