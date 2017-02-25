@@ -22,14 +22,14 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
                 }
             )
     } else { // add to database if not exist
-        WrongRecord.find({ user: user._id, problem: data.problem })
+        WrongRecord.find({ user: user.iss, problem: data.problem })
             .exec()
             .then(function(records) {
                 if (records.length > 0) { //aready exist
                     res.status(200).json({ message: "一错再错..." })
                 } else {
                     var wrongRecord = new WrongRecord(data);
-                    wrongRecord.user = user._id;
+                    wrongRecord.user = user.iss;
                     wrongRecord.save(function(err, savedRecord, numAffected) {
                         if (err) {
                             res.status(500).send(err);
@@ -58,7 +58,6 @@ router.get('/', jwt({ secret: secretCallback }), function(req, res, next) {
 
 router.get('/withcontent', jwt({ secret: secretCallback }), function(req, res, next) {
     var user = req.user;
-    console.log(user);
     WrongRecord.find({ user: user.iss })
         .deepPopulate('problem.parent.parent.parent')
         .exec()
