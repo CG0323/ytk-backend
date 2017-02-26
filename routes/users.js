@@ -122,7 +122,7 @@ router.get('/token', jwt({ secret: secretCallback }), function(req, res) {
             expiresIn = Math.floor(user_expired_in) + 'h';
         }
         // var token = jwt_generator.sign({ iss: user_id, _id: user._id, username: user.username, name: user.name, role: user.role }, secret, { expiresIn: expiresIn });
-        var token = jwt_generator.sign({ iss: user_id, role: user.role }, secret, { expiresIn: expiresIn });
+        var token = jwt_generator.sign({ iss: user._id, role: user.role }, secret, { expiresIn: expiresIn });
         res.status(200).json({ token: token });
     });
 
