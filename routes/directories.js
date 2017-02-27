@@ -33,7 +33,7 @@ router.get('/', function(req, res, next) {
 router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
 
     //first get list of passed directories
-    Exam.distinct("directory", { user: req.user.iss, status: "达标" }, { directory: 1 })
+    Exam.find({ user: req.user.iss, status: "达标" }, { directory: 1 })
         .select('directory')
         .exec()
         .then(function(exams) {
