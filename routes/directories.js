@@ -31,15 +31,14 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
-
+    var passed_directories = [];
     //first get list of passed directories
     Exam.find({ user: req.user.iss, status: "达标" }, { directory: 1, _id: 0 })
         .exec()
         .then(function(exams) {
-            passed_directories = exams.map(exam => {
-                console.log(exam.directory);
-                return exam.directory
-            });
+            for (var i = 0; i < exams.length; i++) {
+                passed_directories.push(exams[i].directory);
+            }
             var root = { label: '练习题库', items: [] };
             Directory.find({ parent: { $exists: false } })
                 .exec()
