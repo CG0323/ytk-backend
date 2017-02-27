@@ -36,7 +36,10 @@ router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
     Exam.find({ user: req.user.iss, status: "达标" }, { directory: 1, _id: 0 })
         .exec()
         .then(function(exams) {
-            passed_directories = exams.map(exam => exam.directory);
+            passed_directories = exams.map(exam => {
+                console.log(exam.directory);
+                return exam.directory
+            });
             var root = { label: '练习题库', items: [] };
             Directory.find({ parent: { $exists: false } })
                 .exec()
@@ -111,7 +114,6 @@ function getNode(directory, passed_directories) {
     var node = {};
     node.label = directory.name;
     if (directory.level == 3) {
-        console.log(passed_directories);
         if (passed_directories.indexOf(directory._id) >= 0) {
             node.label = directory.name + "(已达标)";
         }
