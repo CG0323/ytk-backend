@@ -37,7 +37,6 @@ router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
         .exec()
         .then(function(exams) {
             passed_directories = exams.map(exam => exam.directory);
-            console.log(passed_directories);
             var root = { label: '练习题库', items: [] };
             Directory.find({ parent: { $exists: false } })
                 .exec()
@@ -112,7 +111,7 @@ function getNode(directory, passed_directories) {
     var node = {};
     node.label = directory.name;
     if (directory.level == 3) {
-        if (passed_directories.indexOf(directory._id) != -1) {
+        if (passed_directories.contains(directory._id)) {
             console.log("heere");
             node.label = directory.name + "(已达标)";
         }
