@@ -25,7 +25,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
 // var user = req.user;
 // Exam.find({ user: user.iss })
 router.get('/', function(req, res, next) {
-    Exam.find({ user: user.iss })
+    Exam.find({})
         .exec()
         .then(function(exams) {
                 exams = exams.map(exam => {
