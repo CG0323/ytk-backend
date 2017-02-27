@@ -34,7 +34,6 @@ router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
 
     //first get list of passed directories
     Exam.find({ user: req.user.iss, status: "达标" }, { directory: 1, _id: 0 })
-        .select('directory')
         .exec()
         .then(function(exams) {
             passed_directories = exams.map(exam => exam.directory);
