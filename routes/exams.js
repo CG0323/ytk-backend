@@ -26,14 +26,14 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
 // Exam.find({ user: user.iss })
 router.get('/', function(req, res, next) {
     Exam.find({})
+        .deepPopulate('directory.parent.parent')
         .exec()
         .then(function(exams) {
-                console.log(exams);
-                // retVal = exams.map(exam => {
-                //     exam.directory_path = exam.directory.parent.parent.name + "/" + exam.directory.parent.name + "/" + exam.directory.name;
-                //     return exam;
-                // })
-                res.json(exams);
+                retVal = exams.map(exam => {
+                    exam.directory_path = exam.directory.parent.parent.name + "/" + exam.directory.parent.name + "/" + exam.directory.name;
+                    return exam;
+                })
+                res.json(retVal);
             },
             function(err) {
                 res.status(500).end();
