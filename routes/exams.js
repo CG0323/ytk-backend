@@ -26,7 +26,6 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
 // Exam.find({ user: user.iss })
 router.get('/', function(req, res, next) {
     Exam.find({})
-        .deepPopulate('directory.parent.parent')
         .exec()
         .then(function(exams) {
                 res.json(exams);
@@ -54,13 +53,8 @@ router.get('/clear', function(req, res, next) {
 router.get('/directory/:id', jwt({ secret: secretCallback }), function(req, res, next) {
     var directoryId = req.params.id;
     Exam.find({ directory: directoryId })
-        .deepPopulate('directory.parent.parent')
         .exec()
         .then(function(exams) {
-                // exams = exams.map(exam => {
-                //     exam.directory_path = exam.directory.parent.parent.name + "/" + exam.directory.parent.name + "/" + exam.directory.name;
-                //     return exam;
-                // })
                 res.json(exams);
             },
             function(err) {
@@ -80,7 +74,6 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
         .sort({ total_score: -1 })
         .skip(first)
         .limit(rows)
-        .deepPopulate('directory.parent.parent')
         .exec()
         .then(function(exams) {
                 Exam.count(conditions, function(err, c) {

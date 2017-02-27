@@ -5,6 +5,7 @@ mongoose.Promise = require('q').Promise;
 
 var schema = new mongoose.Schema({
     directory: { type: mongoose.Schema.Types.ObjectId, ref: 'Directory' },
+    directory_path: String,
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     exam_date: { type: Date },
     duration: Number,
@@ -16,8 +17,7 @@ var schema = new mongoose.Schema({
     total_score: Number,
     status: String
 });
-var deepPopulate = require('mongoose-deep-populate')(mongoose);
-schema.plugin(deepPopulate);
+
 
 schema.index({ directory: 1, user: 1, exam_date: -1 });
 mongoose.model('Exam', schema);
