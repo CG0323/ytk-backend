@@ -114,7 +114,7 @@ function getNode(directory, passed_directories) {
     node.label = directory.name;
     if (directory.level == 3) {
         if (passed_directories.indexOf(directory._id.toString()) >= 0) {
-            node.label = directory.name + "(已达标)";
+            node.label = directory.name + " (已达标)";
         }
         node._id = directory._id;
         node.exam_pass_score = directory.exam_pass_score ? directory.exam_pass_score : 360;
