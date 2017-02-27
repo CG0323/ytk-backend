@@ -33,39 +33,39 @@ router.get('/', function(req, res, next) {
 router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
 
     //first get list of passed directories
-    Exam.find({ user: req.user.iss, status: "达标" }, { directory: 1 })
+    Exam.find({ user: req.user.iss, status: "达标" }, { directory: 1, _id: 0 })
         .select('directory')
         .exec()
         .then(function(exams) {
-            console.log(exams);
+            passed_directories = exams.map(exam => exam.directory);
+            var root = { label: '练习题库', items: [] };
+            Directory.find({ parent: { $exists: false } })
+                .exec()
+                .then(function(directories) {
+                        var promises = [];
+                        directories.forEach(function(directory) {
+                            promises.push(getNode(directory, passed_directories));
+                        });
+                        Q.all(promises)
+                            .then(function(items) {
+                                root.items = items;
+                                res.status(200).json(items);
+                            }, function(err) {
+                                res.status(500).send(err);
+                            })
+
+                    },
+                    function(err) {
+                        res.status(500).send(err);
+                    }
+                )
         })
 
-    var root = { label: '练习题库', items: [] };
-    Directory.find({ parent: { $exists: false } })
-        .exec()
-        .then(function(directories) {
-                var promises = [];
-                directories.forEach(function(directory) {
-                    promises.push(getNode(directory));
-                });
-                Q.all(promises)
-                    .then(function(items) {
-                        root.items = items;
-                        res.status(200).json(items);
-                    }, function(err) {
-                        res.status(500).send(err);
-                    })
 
-
-            },
-            function(err) {
-                res.status(500).send(err);
-            }
-        )
 
 });
 
-function getChildren(parent) {
+function getChildren(parent, passed_directories) {
     var defer = Q.defer();
     var deepPopulate = '';
     if (parent.level === 2) {
@@ -80,7 +80,7 @@ function getChildren(parent) {
                 } else {
                     var promises = [];
                     directories.forEach(function(directory) {
-                        promises.push(getNode(directory));
+                        promises.push(getNode(directory, passed_directories));
                     });
                     Q.all(promises)
                         .then(function(items) {
@@ -107,17 +107,20 @@ function getChildren(parent) {
     return defer.promise;
 }
 
-function getNode(directory) {
+function getNode(directory, passed_directories) {
     var defer = Q.defer();
     var node = {};
     node.label = directory.name;
     if (directory.level == 3) {
+        if (passed_directories.indexOf(directory._id) != -1) {
+            node.label = directory.name + "(已达标)";
+        }
         node._id = directory._id;
         node.exam_pass_score = directory.exam_pass_score ? directory.exam_pass_score : 360;
         node.path = directory.parent.parent.name + "/" + directory.parent.name + "/" + directory.name;
         defer.resolve(node);
     } else {
-        getChildren(directory)
+        getChildren(directory, passed_directories)
             .then(function(data) {
                 if (data && data.length > 0) {
                     node.items = data;
