@@ -28,11 +28,11 @@ router.get('/', function(req, res, next) {
     Exam.find({})
         .exec()
         .then(function(exams) {
-                exams = exams.map(exam => {
+                retVal = exams.map(exam => {
                     exam.directory_path = exam.directory.parent.parent.name + "/" + exam.directory.parent.name + "/" + exam.directory.name;
                     return exam;
                 })
-                res.json(exams);
+                res.json(retVal);
             },
             function(err) {
                 res.status(500).end();
