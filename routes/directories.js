@@ -4,6 +4,8 @@ var Directory = require('../models/directory.js')(db);
 var router = express.Router();
 var Q = require('q');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
+var Exam = require('../models/exam.js')(db);
+var jwt = require('express-jwt');
 
 router.post('/', function(req, res) {
     var directory = new Directory(req.body);
@@ -28,7 +30,16 @@ router.get('/', function(req, res, next) {
         )
 });
 
-router.get('/tree', function(req, res, next) {
+router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
+
+    //first get list of passed directories
+    Exam.distinct("directory", { user: req.user.iss, status: "达标" }, { directory: 1 })
+        .select('directory')
+        .exec()
+        .then(function(exams) {
+            console.log(exams);
+        })
+
     var root = { label: '练习题库', items: [] };
     Directory.find({ parent: { $exists: false } })
         .exec()
@@ -97,7 +108,6 @@ function getChildren(parent) {
 }
 
 function getNode(directory) {
-
     var defer = Q.defer();
     var node = {};
     node.label = directory.name;
