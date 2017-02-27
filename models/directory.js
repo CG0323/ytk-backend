@@ -6,7 +6,8 @@ mongoose.Promise = require('q').Promise;
 var schema = new mongoose.Schema({
     name: String,
     level: Number,
-    parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Directory' }
+    parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Directory' },
+    exam_pass_score: Number
 });
 
 schema.index({ parent: 1 });

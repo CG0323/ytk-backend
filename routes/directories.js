@@ -98,6 +98,7 @@ function getNode(directory) {
     node.label = directory.name;
     if (directory.level == 3) {
         node.id = directory._id;
+        node.exam_pass_score = directory.exam_pass_score ? directory.exam_pass_score : 360;
     }
 
     getChildren(directory)
