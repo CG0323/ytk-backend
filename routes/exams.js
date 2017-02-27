@@ -21,8 +21,10 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
     });
 });
 
-router.get('/', jwt({ secret: secretCallback }), function(req, res, next) {
-    var user = req.user;
+// router.get('/', jwt({ secret: secretCallback }), function(req, res, next) {
+// var user = req.user;
+// Exam.find({ user: user.iss })
+router.get('/', function(req, res, next) {
     Exam.find({ user: user.iss })
         .exec()
         .then(function(exams) {
