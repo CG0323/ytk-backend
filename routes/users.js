@@ -301,6 +301,29 @@ router.put('/:id', jwt({ secret: secretCallback }), function(req, res) {
     });
 });
 
+router.post('/resetpsw', jwt({ secret: secretCallback }), function(req, res) {
+    if (user.role == "学员") {
+        res.status(401).json({ message: "无权限查重置密码" });
+    }
+    var userId = req.body.userId;
+    var newPassword = req.body.newPassword;
+    User.findById(userId)
+        .exec()
+        .then(function(user) {
+            user.setPassword(newPassword, function() {
+                user.init_password = newPassword;
+                user.save(function(err) {
+                    if (err) {
+                        logger.error(err);
+                        res.status(400).json({ message: '密码修改失败' });
+                    }
+                    logger.info(req.user.iss + " 重置了用户" + user.username + "的密码。" + req.clientIP);
+                    res.status(200).json({ message: '用户密码已成功重置' });
+                });
+            });
+        })
+});
+
 router.post('/changepsw', jwt({ secret: secretCallback }), function(req, res) {
     User.findById(req.user.iss, function(err, user1) {
         if (err)
