@@ -74,6 +74,7 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
         .sort({ total_score: -1 })
         .skip(first)
         .limit(rows)
+        .populate('user.name user.username')
         .exec()
         .then(function(exams) {
                 Exam.count(conditions, function(err, c) {
@@ -82,7 +83,7 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
                         res.status(500).json({ message: "获取测验结果总数失败" });
                     }
                     res.status(200).json({
-                        totalCount: c,
+                        total_count: c,
                         exams: exams
                     })
                 });
