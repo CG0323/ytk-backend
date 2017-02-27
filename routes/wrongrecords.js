@@ -79,7 +79,7 @@ router.get('/withcontent', jwt({ secret: secretCallback }), function(req, res, n
         )
 });
 
-router.get('/user/:userId', function(req, res, next) {
+router.get('/user/:userId', jwt({ secret: secretCallback }), function(req, res, next) {
     var userId = req.params.userId;
     WrongRecord.find({ user: userId })
         .populate('problem')
@@ -88,7 +88,7 @@ router.get('/user/:userId', function(req, res, next) {
                 res.json(records);
             },
             function(err) {
-                res.status(500).end();
+                res.status(500).json({ message: err });
             }
         )
 });
