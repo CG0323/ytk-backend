@@ -13,7 +13,8 @@ var schema = new mongoose.Schema({
     wrong_count: Number,
     score: Number,
     time_bonus: Number,
-    total_score: Number
+    total_score: Number,
+    status: String
 });
 var deepPopulate = require('mongoose-deep-populate')(mongoose);
 schema.plugin(deepPopulate);
