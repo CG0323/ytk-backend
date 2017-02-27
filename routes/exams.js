@@ -74,7 +74,7 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
         .sort({ total_score: -1 })
         .skip(first)
         .limit(rows)
-        .populate('user')
+        .populate({ path: 'user', select: { _id: 1, name: 1, username: 1 } })
         .exec()
         .then(function(exams) {
                 Exam.count(conditions, function(err, c) {
