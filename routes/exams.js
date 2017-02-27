@@ -30,8 +30,10 @@ router.get('/', function(req, res, next) {
         .exec()
         .then(function(exams) {
                 retVal = exams.map(exam => {
-                    exam.directory_path = exam.directory.parent.parent.name + "/" + exam.directory.parent.name + "/" + exam.directory.name;
-                    return exam;
+                    var retVal = Object.assign({}, exam);
+                    retVal.directory_path = exam.directory.parent.parent.name + "/" + exam.directory.parent.name + "/" + exam.directory.name;
+                    retVal.directory = exam.directory._id;
+                    return retVal;
                 })
                 res.json(retVal);
             },
