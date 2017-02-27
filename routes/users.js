@@ -302,7 +302,7 @@ router.put('/:id', jwt({ secret: secretCallback }), function(req, res) {
 });
 
 router.post('/resetpsw', jwt({ secret: secretCallback }), function(req, res) {
-    if (user.role == "学员") {
+    if (req.user.role == "学员") {
         res.status(401).json({ message: "无权限查重置密码" });
     }
     var userId = req.body.userId;
