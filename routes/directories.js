@@ -37,7 +37,7 @@ router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
         .exec()
         .then(function(exams) {
             for (var i = 0; i < exams.length; i++) {
-                passed_directories.push(exams[i].directory);
+                passed_directories.push(exams[i].directory.trim());
             }
             console.log(passed_directories);
             var root = { label: '练习题库', items: [] };
