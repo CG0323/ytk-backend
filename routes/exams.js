@@ -29,13 +29,21 @@ router.get('/', function(req, res, next) {
         .deepPopulate('directory.parent.parent')
         .exec()
         .then(function(exams) {
-                retVal = exams.map(exam => {
-                    var retVal = Object.assign({}, exam);
-                    retVal.directory_path = exam.directory.parent.parent.name + "/" + exam.directory.parent.name + "/" + exam.directory.name;
-                    retVal.directory = exam.directory._id;
-                    return retVal;
-                })
-                res.json(retVal);
+                res.json(exams);
+            },
+            function(err) {
+                res.status(500).json({ message: err });
+            }
+        )
+});
+
+//临时接口
+router.get('/clear', function(req, res, next) {
+    Exam.find()
+        .remove()
+        .exec()
+        .then(function(exams) {
+                res.json(exams);
             },
             function(err) {
                 res.status(500).end();
@@ -49,14 +57,75 @@ router.get('/directory/:id', jwt({ secret: secretCallback }), function(req, res,
         .deepPopulate('directory.parent.parent')
         .exec()
         .then(function(exams) {
-                exams = exams.map(exam => {
-                    exam.directory_path = exam.directory.parent.parent.name + "/" + exam.directory.parent.name + "/" + exam.directory.name;
-                    return exam;
-                })
+                // exams = exams.map(exam => {
+                //     exam.directory_path = exam.directory.parent.parent.name + "/" + exam.directory.parent.name + "/" + exam.directory.name;
+                //     return exam;
+                // })
                 res.json(exams);
             },
             function(err) {
-                res.status(500).end();
+                res.status(500).json({ message: err });
+            }
+        )
+});
+
+router.post('/search', jwt({ secret: secretCallback }), function(req, res, next) {
+    var param = req.body;
+    var first = param.first;
+    var rows = param.rows;
+    var directoryId = param.directory;
+    var conditions = { directory: directoryId };
+
+    Exam.find(conditions)
+        .sort({ total_score: -1 })
+        .skip(first)
+        .limit(rows)
+        .deepPopulate('directory.parent.parent')
+        .exec()
+        .then(function(exams) {
+                Exam.count(conditions, function(err, c) {
+                    if (err) {
+                        logger.error(err);
+                        res.status(500).json({ message: "获取测验结果总数失败" });
+                    }
+                    res.status(200).json({
+                        totalCount: c,
+                        exams: exams
+                    })
+                });
+            },
+            function(err) {
+                res.status(500).json({ message: err });
+            }
+        )
+});
+
+router.post('/search-self', jwt({ secret: secretCallback }), function(req, res, next) {
+    var userId = req.user.iss;
+    var param = req.body;
+    var first = param.first;
+    var rows = param.rows;
+    var conditions = { user: userId };
+    Exam.find(conditions)
+        .sort({ exam_date: -1 })
+        .skip(first)
+        .limit(rows)
+        .deepPopulate('directory.parent.parent')
+        .exec()
+        .then(function(exams) {
+                Exam.count(conditions, function(err, c) {
+                    if (err) {
+                        logger.error(err);
+                        res.status(500).json({ message: "获取测验结果总数失败" });
+                    }
+                    res.status(200).json({
+                        totalCount: c,
+                        exams: exams
+                    })
+                });
+            },
+            function(err) {
+                res.status(500).json({ message: err });
             }
         )
 });

@@ -12,8 +12,8 @@ var schema = new mongoose.Schema({
     right_count: Number,
     wrong_count: Number,
     score: Number,
-    timeBonus: Number,
-    totalScore: Number
+    time_bonus: Number,
+    total_score: Number
 });
 var deepPopulate = require('mongoose-deep-populate')(mongoose);
 schema.plugin(deepPopulate);

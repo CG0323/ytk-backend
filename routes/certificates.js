@@ -91,7 +91,6 @@ router.get('/client-search/:search', function(req, res, next) {
         )
 });
 
-// router.post('/search', jwt({ secret: secretCallback }), function(req, res, next) {
 router.post('/search', jwt({ secret: secretCallback }), function(req, res, next) {
     var param = req.body;
     var first = param.first;
@@ -110,7 +109,7 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
                 Certificate.count(conditions, function(err, c) {
                     if (err) {
                         logger.error(err);
-                        res.status(500).json({ error: "获取证书总数失败" });
+                        res.status(500).json({ message: "获取证书总数失败" });
                     }
                     res.status(200).json({
                         totalCount: c,
@@ -119,7 +118,7 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
                 });
             },
             function(err) {
-                res.status(500).json({ error: err });
+                res.status(500).json({ message: err });
             }
         )
 });
