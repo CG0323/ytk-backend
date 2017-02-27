@@ -111,7 +111,7 @@ function getNode(directory, passed_directories) {
     var node = {};
     node.label = directory.name;
     if (directory.level == 3) {
-        if (passed_directories.contains(directory._id)) {
+        if (passed_directories.indexOf(directory._id) >= 0) {
             console.log("heere");
             node.label = directory.name + "(已达标)";
         }
