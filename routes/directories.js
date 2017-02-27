@@ -56,7 +56,12 @@ router.get('/tree', function(req, res, next) {
 
 function getChildren(parent) {
     var defer = Q.defer();
+    var deepPopulate = '';
+    if (parent.level === 2) {
+        deepPopulate = 'parent.parent'
+    }
     Directory.find({ parent: parent._id })
+        .deepPopulate(deepPopulate)
         .exec()
         .then(function(directories) {
                 if (directories.length == 0) {
@@ -97,19 +102,23 @@ function getNode(directory) {
     var node = {};
     node.label = directory.name;
     if (directory.level == 3) {
-        node.id = directory._id;
+        node._id = directory._id;
         node.exam_pass_score = directory.exam_pass_score ? directory.exam_pass_score : 360;
+        node.path = directory.parent.parent.name + "/" + directory.parent.name + "/" + directory.name;
+        defer.resolve(node);
+    } else {
+        getChildren(directory)
+            .then(function(data) {
+                if (data && data.length > 0) {
+                    node.items = data;
+                }
+                defer.resolve(node);
+            }, function(err) {
+                defer.reject(err);
+            })
     }
 
-    getChildren(directory)
-        .then(function(data) {
-            if (data && data.length > 0) {
-                node.items = data;
-            }
-            defer.resolve(node);
-        }, function(err) {
-            defer.reject(err);
-        })
+
     return defer.promise;
 }
 

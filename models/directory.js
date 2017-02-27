@@ -10,6 +10,8 @@ var schema = new mongoose.Schema({
     exam_pass_score: Number
 });
 
+var deepPopulate = require('mongoose-deep-populate')(mongoose);
+schema.plugin(deepPopulate);
 schema.index({ parent: 1 });
 
 mongoose.model('Directory', schema);

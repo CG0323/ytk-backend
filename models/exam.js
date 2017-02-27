@@ -19,7 +19,7 @@ var schema = new mongoose.Schema({
 var deepPopulate = require('mongoose-deep-populate')(mongoose);
 schema.plugin(deepPopulate);
 
-schema.index({ directory: 1, user: 1 });
+schema.index({ directory: 1, user: 1, exam_date: -1 });
 mongoose.model('Exam', schema);
 
 module.exports = function(connection) {
