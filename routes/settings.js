@@ -48,7 +48,7 @@ router.get('/', function(req, res, next) {
         )
 });
 
-export function getDefaultSettings() {
+function getDefaultSettings() {
     var settings = {};
     settings.price_3_months = 10;
     settings.price_12_months = 30;
