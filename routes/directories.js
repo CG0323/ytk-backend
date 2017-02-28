@@ -117,7 +117,7 @@ function getNode(directory, passed_directories) {
             node.label = directory.name + " (已达标)";
         }
         node._id = directory._id;
-        node.exam_pass_score = directory.exam_pass_score ? directory.exam_pass_score : 360;
+        node.exam_pass_score = directory.exam_pass_score;
         node.path = directory.parent.parent.name + "/" + directory.parent.name + "/" + directory.name;
         defer.resolve(node);
     } else {
