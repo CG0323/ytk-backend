@@ -13,7 +13,9 @@ var schema = new mongoose.Schema({
     expired_at: { type: Date },
     created_at: { type: Date },
     updated_at: { type: Date },
-    last_key: String
+    last_key: String,
+    mail: String,
+    mail_post_at: { type: Date },
 });
 
 schema.plugin(passportLocalMongoose);

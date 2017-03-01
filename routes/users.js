@@ -13,7 +13,7 @@ var secretCallback = require('../utils/secretCallback.js').secretCallback;
 
 router.get('/me', jwt({ secret: secretCallback }), function(req, res) {
     User.findOne({ _id: req.user.iss })
-        .populate({ path: 'teacher', select: { _id: 1, name: 1 } })
+        .populate({ path: 'teacher', select: { _id: 1, name: 1, mail: 1 } })
         .exec()
         .then(function(user) {
             res.status(200).json({ _id: user._id, username: user.username, name: user.name, role: user.role, teacher: user.teacher, expired_at: user.expired_at });
@@ -101,7 +101,7 @@ router.post('/login', function(req, res, next) {
                     res.status(500).json({ message: err });
                 }
                 User.findById(user.teacher, function(err, teacher) {
-                    res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at, teacher: { _id: teacher._id, name: teacher.name } });
+                    res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at, teacher: { _id: teacher._id, name: teacher.name, mail: teacher.mail } });
                 })
             }
         }
@@ -282,6 +282,23 @@ router.get('/:id', jwt({ secret: secretCallback }), function(req, res) {
         });
 });
 
+router.put('/mail', jwt({ secret: secretCallback }), function(req, res) {
+    User.findById(req.user.iss, function(err, user) {
+        if (err)
+            res.status(500).json({ message: err });
+        user.mail = req.body;
+        user.mail_post_at = new Date();
+        user.save(function(err) {
+            if (err) {
+                logger.error(err);
+                res.status(500).json({ message: err });
+            }
+            logger.info(user.username + " 更新了通知信息" + "。" + req.clientIP);
+            res.json({ message: '通知栏已成功设置' });
+        });
+    });
+});
+
 router.put('/:id', jwt({ secret: secretCallback }), function(req, res) {
     User.findById(req.params.id, function(err, user) {
         if (err)
@@ -289,6 +306,7 @@ router.put('/:id', jwt({ secret: secretCallback }), function(req, res) {
         user.name = req.body.name;
         user.username = req.body.username;
         user.expired_at = req.body.expired_at;
+        user.mail = req.body.mail;
         user.save(function(err) {
             if (err) {
                 logger.error(err);
