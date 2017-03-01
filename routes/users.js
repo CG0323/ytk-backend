@@ -16,7 +16,7 @@ router.get('/me', jwt({ secret: secretCallback }), function(req, res) {
         .populate({ path: 'teacher', select: { _id: 1, name: 1, mail: 1 } })
         .exec()
         .then(function(user) {
-            res.status(200).json({ _id: user._id, username: user.username, name: user.name, role: user.role, teacher: user.teacher, expired_at: user.expired_at });
+            res.status(200).json({ _id: user._id, username: user.username, name: user.name, role: user.role, teacher: user.teacher, expired_at: user.expired_at, mail: mail, mail_post_at: mail_post_at });
         }, function(err) {
             logger.error(err);
             res.status(500).json({ message: err });
