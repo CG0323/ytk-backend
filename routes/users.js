@@ -287,7 +287,12 @@ router.post('/mail', jwt({ secret: secretCallback }), function(req, res) {
         if (err)
             res.status(500).json({ message: err });
         user.mail = req.body.mail;
-        user.mail_post_at = new Date();
+        if (user.mail && user.mail != "") {
+            user.mail_post_at = new Date();
+        } else {
+            user.mail_post_at = null;
+        }
+
         user.save(function(err) {
             if (err) {
                 logger.error(err);
