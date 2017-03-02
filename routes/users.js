@@ -13,7 +13,7 @@ var secretCallback = require('../utils/secretCallback.js').secretCallback;
 
 router.get('/me', jwt({ secret: secretCallback }), function(req, res) {
     User.findOne({ _id: req.user.iss })
-        .populate({ path: 'teacher', select: { _id: 1, name: 1, mail: 1 } })
+        .populate({ path: 'teacher', select: { _id: 1, name: 1, mail: 1, mail_post_at: 1 } })
         .exec()
         .then(function(user) {
             res.status(200).json({ _id: user._id, username: user.username, name: user.name, role: user.role, teacher: user.teacher, expired_at: user.expired_at, mail: user.mail, mail_post_at: user.mail_post_at });
@@ -101,7 +101,7 @@ router.post('/login', function(req, res, next) {
                     res.status(500).json({ message: err });
                 }
                 User.findById(user.teacher, function(err, teacher) {
-                    res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at, teacher: { _id: teacher._id, name: teacher.name, mail: teacher.mail } });
+                    res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at, teacher: { _id: teacher._id, name: teacher.name, mail: teacher.mail, mail_post_at: teacher.mail_post_at } });
                 })
             }
         }
