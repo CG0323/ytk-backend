@@ -283,6 +283,7 @@ router.get('/:id', jwt({ secret: secretCallback }), function(req, res) {
 });
 
 router.post('/mail', jwt({ secret: secretCallback }), function(req, res) {
+    console.log(req.body);
     User.findById(req.user.iss, function(err, user) {
         if (err)
             res.status(500).json({ message: err });
