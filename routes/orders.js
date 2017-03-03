@@ -16,7 +16,7 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
 
 function generateOutTradeNo() {
     var now = new Date();
-    var prefix = (now.toLocaleString().replace(/[-T:Z\.]/g, '').substr(0, 16)).toString();
+    var prefix = (now.toISOString().replace(/[-T:Z\.]/g, '').substr(0, 16)).toString();
     var total = 1;
     for (let i = 0; i < 4; i++) {
         total *= 10;
