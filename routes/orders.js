@@ -65,6 +65,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
                 } else { // update existing one
                     order = data[0];
                     order.user = req.user.iss;
+                    order.payer_name = erq.user.name;
                     order.tansaction_id = "1234567890123";
                     order.order_date = new Date();
                     order.total_fee = updated_order.total_fee;
@@ -107,6 +108,46 @@ router.get('/', function(req, res, next) {
         .exec()
         .then(function(orders) {
                 res.json(orders);
+            },
+            function(err) {
+                res.status(500).json({ message: err });
+            }
+        )
+});
+
+router.post('/search', jwt({ secret: secretCallback }), function(req, res, next) {
+    var param = req.body;
+    var first = param.first;
+    var rows = param.rows;
+    var search = param.search;
+    var conditions = {};
+    if (search) {
+        conditions = {
+            $or: [
+                { out_trade_no: { $regex: search } },
+                { transaction_id: { $regex: search } },
+                { student_usernames: { $regex: search } },
+                { student_names: { $regex: search } },
+                { payer_name: { $regex: search } },
+            ]
+        };
+    }
+    Order.find(conditions)
+        .sort({ date: -1 })
+        .skip(first)
+        .limit(rows)
+        .exec()
+        .then(function(orders) {
+                Order.count(conditions, function(err, c) {
+                    if (err) {
+                        logger.error(err);
+                        res.status(500).json({ message: "获取订单总数失败" });
+                    }
+                    res.status(200).json({
+                        totalCount: c,
+                        orders: orders
+                    })
+                });
             },
             function(err) {
                 res.status(500).json({ message: err });

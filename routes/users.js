@@ -91,7 +91,11 @@ router.post('/login', function(req, res, next) {
             var secret = generateSecret();
             user.last_key = secret;
             user.save(); // no check for now, not sure if it is ok
-            var token = jwt_generator.sign({ iss: user._id, role: user.role }, secret, { expiresIn: '24h' });
+            var payload = { iss: user._id, role: user.role };
+            if (user.role === "老师") {
+                payload.name = user.name;
+            }
+            var token = jwt_generator.sign(payload, secret, { expiresIn: '24h' });
             logger.info(user.name + " 登录系统。" + req.clientIP);
             if (user.role != "学员") {
                 res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at });
@@ -121,8 +125,12 @@ router.get('/token', jwt({ secret: secretCallback }), function(req, res) {
         if (user_expired_in < 24) {
             expiresIn = Math.floor(user_expired_in) + 'h';
         }
+        var payload = { iss: user._id, role: user.role };
+        if (user.role === "老师") {
+            payload.name = user.name;
+        }
         // var token = jwt_generator.sign({ iss: user_id, _id: user._id, username: user.username, name: user.name, role: user.role }, secret, { expiresIn: expiresIn });
-        var token = jwt_generator.sign({ iss: user._id, role: user.role }, secret, { expiresIn: expiresIn });
+        var token = jwt_generator.sign(payload, secret, { expiresIn: expiresIn });
         res.status(200).json({ token: token });
     });
 
