@@ -132,6 +132,10 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
             ]
         };
     }
+    if (req.user.role === "老师") { // 老师只能查看自己的支付记录
+        conditions.user = req.user.iss;
+    }
+
     Order.find(conditions)
         .sort({ date: -1 })
         .skip(first)
