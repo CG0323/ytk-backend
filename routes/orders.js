@@ -16,16 +16,29 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
 router.get('/wxpay/notify1/:tradeNo', function(req, res) {
     var tradeNo = req.params.tradeNo;
     // create the order in db
-    var order = new Order();
-    order.out_trade_no = tradeNo;
-    order.save(function(err, savedOrder, numAffected) {
-        if (err) {
-            console.log(err);
-            res.status(500).json({ message: err });
-        } else {
-            res.status(200).send("您的订单：" + tradeNo + "已成功支付。");
-        }
-    });
+    Order.find({ out_trade_no: tradeNo })
+        .exec()
+        .then(function(orders) {
+                if (orders.length > 0) {
+                    res.status(200).send("您的订单：" + tradeNo + "已成功支付。");
+                } else {
+                    var order = new Order();
+                    order.out_trade_no = tradeNo;
+                    order.save(function(err, savedOrder, numAffected) {
+                        if (err) {
+                            console.log(err);
+                            res.status(500).json({ message: err });
+                        } else {
+                            res.status(200).send("您的订单：" + tradeNo + "已成功支付。");
+                        }
+                    });
+                }
+            },
+            function(err) {
+                res.status(500).json({ message: err });
+            }
+        )
+
 })
 
 router.get('/query/:tradeNo', jwt({ secret: secretCallback }), function(req, res) {
