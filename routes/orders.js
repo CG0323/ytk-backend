@@ -12,6 +12,11 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
     res.status(200).json({ tradeNo: tradeNo });
 });
 
+router.get('/wxpay/notify1/:total', function(req, res) {
+    var total = req.params.total;
+    res.status(200).send("您的" + total + "元已成功支付。");
+})
+
 
 
 function generateOutTradeNo() {
