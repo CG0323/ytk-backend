@@ -8,14 +8,15 @@ var logger = require('../utils/logger.js');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
 
 router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
-    var orderNo = generateOrderNo();
-    res.status(200).json({ orderNo: orderNo });
+    var tradeNo = generateOutTradeNo();
+    res.status(200).json({ tradeNo: tradeNo });
 });
 
 
-function generateOrderNo() {
+
+function generateOutTradeNo() {
     var now = new Date();
-    var prefix = (now.toISOString().replace(/[-T:Z\.]/g, '').substr(0, 16)).toString();
+    var prefix = (now.toLocaleString().replace(/[-T:Z\.]/g, '').substr(0, 16)).toString();
     var total = 1;
     for (let i = 0; i < 4; i++) {
         total *= 10;
