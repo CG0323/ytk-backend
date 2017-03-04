@@ -53,6 +53,20 @@ router.get('/', function(req, res, next) {
         )
 });
 
+//临时接口
+router.get('/clear', function(req, res, next) {
+    Issue.find()
+        .remove()
+        .exec()
+        .then(function(info) {
+                res.json(info);
+            },
+            function(err) {
+                res.status(500).end();
+            }
+        )
+});
+
 
 
 module.exports = router;
