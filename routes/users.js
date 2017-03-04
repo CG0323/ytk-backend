@@ -241,6 +241,56 @@ router.get('/teachers', jwt({ secret: secretCallback }), function(req, res, next
         )
 });
 
+router.post('/search-students', jwt({ secret: secretCallback }), function(req, res, next) {
+    if (req.user.role == "学员") {
+        res.status(401).json({ message: "无权限查看学员账号" });
+    }
+    var param = req.body;
+    var first = param.first;
+    var rows = param.rows;
+    var search = param.search;
+    var teacher = param.teacher;
+    var status = param.status;
+    var conditions = {};
+    if (search) {
+        conditions = { $or: [{ username: { $regex: search } }, { name: { $regex: search } }] };
+    }
+    if (teacher) {
+        conditions['teacher'] = teacher;
+    }
+    if (req.user.role == "老师") {
+        conditions['teacher'] = req.user.iss;
+    }
+    if (status) {
+        if (status === "已过期") {
+            conditions['expired_at'] = { $lt: new Date() };
+        } else {
+            conditions['expired_at'] = { $gte: new Date() };
+        }
+    }
+    User.find(conditions)
+        .sort({ created_at: -1 })
+        .skip(first)
+        .limit(rows)
+        .exec()
+        .then(function(students) {
+                User.count(conditions, function(err, c) {
+                    if (err) {
+                        logger.error(err);
+                        res.status(500).json({ message: "获取学员总数失败" });
+                    }
+                    res.status(200).json({
+                        totalCount: c,
+                        sutdents: sutdents
+                    })
+                });
+            },
+            function(err) {
+                res.status(500).json({ message: err });
+            }
+        )
+});
+
 router.get('/students', jwt({ secret: secretCallback }), function(req, res, next) {
     var user = req.user;
     if (user.role == "学员") {

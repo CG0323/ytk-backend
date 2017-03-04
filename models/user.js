@@ -18,6 +18,8 @@ var schema = new mongoose.Schema({
     mail_post_at: { type: Date },
 });
 
+schema.index({ teacher: 1, expired_at: 1 });
+
 schema.plugin(passportLocalMongoose);
 
 schema.pre('save', function(next) {
