@@ -5,7 +5,8 @@ mongoose.Promise = require('q').Promise;
 
 var schema = new mongoose.Schema({
     type: String, // 题库错误,系统错误
-    directory_path: String, //微信订单号
+    directory_path: String,
+    directory_owner: String,
     created_at: { type: Date },
     updated_at: { type: Date },
     submitter: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
