@@ -31,11 +31,13 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
             issue.status = data.status;
             issue.type = data.type;
             issue.comments = data.comments;
-            if (err) {
-                res.status(500).json({ message: err });
-            } else {
-                res.status(200).json({ message: "报错已更新" });
-            }
+            issue.save(function(err, savedIssue, numAffected) {
+                if (err) {
+                    res.status(500).json({ message: err });
+                } else {
+                    res.status(200).json({ message: "报错已成功更新" });
+                }
+            });
         })
     }
 });
