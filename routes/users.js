@@ -218,9 +218,6 @@ router.get('/', function(req, res, next) {
 
 router.get('/teachers', jwt({ secret: secretCallback }), function(req, res, next) {
     var user = req.user;
-    if (user.role != "管理员") {
-        res.status(401).json({ message: "无权限查看教师账号" });
-    }
     var query = { role: "老师" };
     User.find(query)
         .exec()
