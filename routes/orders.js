@@ -65,7 +65,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
                 } else { // update existing one
                     order = data[0];
                     order.user = req.user.iss;
-                    order.payer_name = erq.user.name;
+                    order.payer_name = req.user.name;
                     order.tansaction_id = "1234567890123";
                     order.order_date = new Date();
                     order.total_fee = updated_order.total_fee;
