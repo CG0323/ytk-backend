@@ -119,6 +119,7 @@ function getNode(directory, passed_directories) {
         node._id = directory._id;
         node.exam_pass_score = directory.exam_pass_score;
         node.path = directory.parent.parent.name + "/" + directory.parent.name + "/" + directory.name;
+        node.owner = directory.owner;
         defer.resolve(node);
     } else {
         getChildren(directory, passed_directories)

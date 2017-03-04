@@ -7,7 +7,8 @@ var schema = new mongoose.Schema({
     name: String,
     level: Number,
     parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Directory' },
-    exam_pass_score: Number
+    exam_pass_score: Number,
+    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } //when created by teacher, put teacher user id here
 });
 
 var deepPopulate = require('mongoose-deep-populate')(mongoose);
