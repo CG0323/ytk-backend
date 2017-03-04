@@ -137,7 +137,7 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
     }
 
     Order.find(conditions)
-        .sort({ date: -1 })
+        .sort({ order_date: -1 })
         .skip(first)
         .limit(rows)
         .exec()
