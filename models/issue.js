@@ -12,7 +12,7 @@ var schema = new mongoose.Schema({
     submitter: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     submitter_name: String,
     description: String,
-    status: String, //已提交,已分析,已解决
+    status: String, //待处理,已分析,已解决
     comments: [{ content: String, by: String }],
 });
 

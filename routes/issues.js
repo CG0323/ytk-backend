@@ -49,6 +49,7 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
     var rows = param.rows;
     var search = param.search;
     var status = param.status;
+    var type = param.type;
     var conditions = {};
     if (search) {
         conditions = {
@@ -62,9 +63,12 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
     if (status) {
         conditions.status = status;
     }
-    if (req.user.role === "老师") { // 老师只能查看自己的题库反馈
-        conditions.directory_owner = req.user.iss;
+    if (type) {
+        conditions.type = type;
     }
+    // if (req.user.role === "老师") { // 老师只能查看自己的题库反馈
+    //     conditions.directory_owner = req.user.iss;
+    // }
 
     Issue.find(conditions)
         .sort({ created_at: -1 })
