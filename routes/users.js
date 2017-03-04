@@ -9,7 +9,7 @@ var jwt_generator = require('jsonwebtoken');
 var jwt = require('express-jwt');
 var moment = require('moment');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
-
+var Settings = require('../models/settings')(db);
 
 router.get('/me', jwt({ secret: secretCallback }), function(req, res) {
     User.findOne({ _id: req.user.iss })
@@ -172,17 +172,19 @@ router.post('/student', jwt({ secret: secretCallback }), function(req, res) {
         if (users.length > 0) {
             res.status(400).json({ message: '用户名已被使用' });
         } else {
-            var expired_at = moment().add(15, 'days');
-
-            User.register(new User({ teacher: user.iss, username: data.username, name: data.name, role: "学员", init_password: data.password, expired_at: expired_at }), data.password, function(err, savedUser) {
-                if (err) {
-                    logger.error(err);
-                    res.status(500).json({ message: err });
-                } else {
-                    logger.info(user.name + " 创建了学员账号：" + data.username);
-                    res.status(200).json({ message: '已成功创建学员账号', user: { _id: savedUser._id, username: savedUser.username, name: savedUser.name, password: savedUser.init_password, teacher: savedUser.teacher } });
-                }
-            });
+            Settings.findOne({})
+                .then(function(settings) {
+                    var expired_at = moment().add(settings.trial_days, 'days');
+                    User.register(new User({ teacher: user.iss, username: data.username, name: data.name, role: "学员", init_password: data.password, expired_at: expired_at }), data.password, function(err, savedUser) {
+                        if (err) {
+                            logger.error(err);
+                            res.status(500).json({ message: err });
+                        } else {
+                            logger.info(user.name + " 创建了学员账号：" + data.username);
+                            res.status(200).json({ message: '已成功创建学员账号', user: { _id: savedUser._id, username: savedUser.username, name: savedUser.name, password: savedUser.init_password, teacher: savedUser.teacher } });
+                        }
+                    });
+                })
         }
 
     })
