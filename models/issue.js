@@ -5,7 +5,7 @@ mongoose.Promise = require('q').Promise;
 
 var schema = new mongoose.Schema({
     type: String, // 题库错误,系统错误
-    directory_path: String,
+    problem_path: String,
     directory_owner: String,
     created_at: { type: Date },
     updated_at: { type: Date },

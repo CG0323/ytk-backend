@@ -26,7 +26,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
                 logger.error(err);
                 res.status(500).json({ message: err });
             }
-            issue.directory_path = data.directory_path;
+            issue.problem_path = data.problem_path;
             issue.description = data.description;
             issue.status = data.status;
             issue.type = data.type;
@@ -54,7 +54,7 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
     if (search) {
         conditions = {
             $or: [
-                { directory_path: { $regex: search } },
+                { problem_path: { $regex: search } },
                 { submitter_name: { $regex: search } },
                 { description: { $regex: search } }
             ]
