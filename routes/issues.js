@@ -30,7 +30,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
             issue.description = data.description;
             issue.status = data.status;
             issue.type = data.type;
-            isue.comments = data.comments;
+            issue.comments = data.comments;
             if (err) {
                 res.status(500).json({ message: err });
             } else {
