@@ -281,7 +281,7 @@ router.post('/search-students', jwt({ secret: secretCallback }), function(req, r
                     }
                     res.status(200).json({
                         totalCount: c,
-                        sutdents: sutdents
+                        students: students
                     })
                 });
             },
