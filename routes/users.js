@@ -252,6 +252,7 @@ router.post('/search-students', jwt({ secret: secretCallback }), function(req, r
     var teacher = param.teacher;
     var status = param.status;
     var conditions = {};
+    conditions['role'] = "学员";
     if (search) {
         conditions = { $or: [{ username: { $regex: search } }, { name: { $regex: search } }] };
     }
@@ -272,13 +273,33 @@ router.post('/search-students', jwt({ secret: secretCallback }), function(req, r
         .sort({ created_at: -1 })
         .skip(first)
         .limit(rows)
+        .populate('teacher')
         .exec()
-        .then(function(students) {
+        .then(function(data) {
                 User.count(conditions, function(err, c) {
                     if (err) {
                         logger.error(err);
                         res.status(500).json({ message: "获取学员总数失败" });
                     }
+                    var students = data.map(item => {
+                        var student = {};
+                        student._id = item._id;
+                        student.username = item.username;
+                        student.name = item.name;
+                        student.password = item.init_password;
+                        student.expired_at = item.expired_at;
+                        if (item.teacher) {
+                            student.teacher = item.teacher.name;
+                        }
+                        if (!item.expired_at) {
+                            student.status = "未激活";
+                        } else if (item.expired_at < Date.now()) {
+                            student.status = "已过期";
+                        } else {
+                            student.status = "已激活";
+                        }
+                        return student;
+                    })
                     res.status(200).json({
                         totalCount: c,
                         students: students
