@@ -87,6 +87,19 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
         )
 });
 
+router.delete('/:id', jwt({ secret: secretCallback }), function(req, res, next) {
+    var id = req.params.id;
+    Issue.remove({ _id: id })
+        .exec()
+        .then(function(data) {
+                res.json({ message: "记录已成功删除" });
+            },
+            function(err) {
+                res.status(500).json({ error: err, message: "记录删除失败" });
+            }
+        )
+});
+
 router.get('/', function(req, res, next) {
     // var user = req.user;
     Issue.find({})
