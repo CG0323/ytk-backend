@@ -116,6 +116,7 @@ router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
         .then(function(data) {
             if (data.length > 0) {
                 data[0].transaction_id = payInfo.transaction_id;
+                data[0].order_date = new Date(payInfo.time_end);
                 data[0].save();
                 res.success();
             }
