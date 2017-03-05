@@ -25,29 +25,52 @@ var api = new tenpay(tenConfig);
 router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
     var order = req.body;
     if (order.out_trade_no) { // already crated wx order once, need to close it
-        api.closeOrder({ out_trade_no: order.out_trade_no })
+        closeOrder(order);
     }
-
     var out_trade_no = generateOutTradeNo();
     var tenOrder = {
         out_trade_no: out_trade_no,
-        body: '扫码支付测试',
-        total_fee: 1,
+        body: '弈康通激活支付测试',
+        total_fee: Math.floor(rder.total_fee * 100),
         trade_type: 'NATIVE',
-        notify_url: 'http://cg.dplink.com.cn/api/orders/wxpay/notify',
-        product_id: '12months',
+        notify_url: config.wxpay.notify_url,
+        product_id: order.package
     }
     api.unifiedOrder(tenOrder, function(err, result) {
         if (err) {
             res.status(500).json({ message: err });
         }
-        res.status(200).json({ out_trade_no: out_trade_no, pay_url: result.code_url });
-        // api.closeOrder({ out_trade_no: tradeNo }, function(err, result) {
-        //     console.log(result);
-        // });
+        order.out_trade_no = out_trade_no;
+        order.user = req.user.iss;
+        order.payer_name = req.user.name;
+        var insertOrder = new Order(order);
+        order.save(function(err, savedOrder, numAffected) {
+            if (err) {
+                console.log(err);
+                res.status(500).json({ message: err });
+            } else {
+                res.status(200).json({ out_trade_no: out_trade_no, pay_url: result.code_url });
+            }
+        });
     });
 
 });
+
+var middleware = api.middlewareForExpress();
+app.use('/wxpay/notify', middleware, function(req, res) {
+    var payInfo = req.weixin;
+    console.log(payInfo);
+    var out_trade_no = payInfo.out_trade_no;
+    Order.find({ out_trade_no: order.out_trade_no })
+        .exec()
+        .then(function(data) {
+            if (data.length > 0) {
+                data[0].transaction_id = payInfo.transaction_id;
+                data[0].save();
+            }
+        })
+})
+
 
 router.get('/wxpay/notify1/:tradeNo', function(req, res) {
     var tradeNo = req.params.tradeNo;
@@ -77,9 +100,9 @@ router.get('/wxpay/notify1/:tradeNo', function(req, res) {
 
 })
 
-router.get('/query/:tradeNo', jwt({ secret: secretCallback }), function(req, res) {
-    var tradeNo = req.params.tradeNo;
-    Order.find({ out_trade_no: tradeNo })
+router.get('/query/:out_trade_no', jwt({ secret: secretCallback }), function(req, res) {
+    var out_trade_no = req.params.out_trade_no;
+    Order.find({ out_trade_no: out_trade_no, transaction_id: { $exists: true } })
         .exec()
         .then(function(orders) {
                 res.json(orders);
@@ -209,6 +232,17 @@ function generateOutTradeNo() {
 
     var random = base + Math.floor(Math.random() * fill);
     return prefix + random;
+}
+
+function closeOrder(order) {
+    Order.find({ out_trade_no: order.out_trade_no, transaction_id: { $exists: false } })
+        .exec()
+        .then(function(data) {
+            if (data.length > 0) {
+                api.closeOrder({ out_trade_no: order.out_trade_no });
+                Order.remove({ out_trade_no: order.out_trade_no, transaction_id: { $exists: false } });
+            }
+        })
 }
 
 
