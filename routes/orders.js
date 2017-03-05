@@ -8,6 +8,7 @@ var logger = require('../utils/logger.js');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
 var Order = require('../models/order')(db);
 var WXPay = require('node-wxpay');
+var fs = require("fs");
 
 var wxpay = WXPay({
     appid: config.wxpay.app_id,
