@@ -3,7 +3,7 @@
 #sensitive info
 env.json
 fabfile.py
-
+*.p12
 /logs
 
 # compiled output

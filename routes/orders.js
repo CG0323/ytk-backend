@@ -7,9 +7,32 @@ var config = require('../common.js').config();
 var logger = require('../utils/logger.js');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
 var Order = require('../models/order')(db);
+var WXPay = require('node-wxpay');
+
+var wxpay = WXPay({
+    appid: config.wxpay.app_id,
+    mch_id: config.wxpay.mch_id,
+    partner_key: config.partner_key,
+    pfx: fs.readFileSync('../apiclient_cert.p12'),
+});
 
 router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
     var tradeNo = generateOutTradeNo();
+    wxpay.createUnifiedOrder({
+        body: '扫码支付测试',
+        out_trade_no: tradeNo,
+        total_fee: 1,
+        spbill_create_ip: '60.205.216.128',
+        notify_url: 'http://cg.dplink.com.cn/api/orders/wxpay/notify',
+        trade_type: 'NATIVE',
+        product_id: '1234567890'
+    }, function(err, result) {
+        console.log(result);
+        wxpay.closeOrder({ out_trade_no: tradeNo }, function(err, result) {
+            console.log("=============close order===========");
+            console.log(result);
+        });
+    });
     res.status(200).json({ tradeNo: tradeNo });
 });
 
