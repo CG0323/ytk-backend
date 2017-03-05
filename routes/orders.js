@@ -24,10 +24,10 @@ var api = new tenpay(tenConfig);
 
 router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
     var order = req.body;
-    console.log("here");
     if (order.out_trade_no) { // already crated wx order once, need to close it
         closeOrder(order);
     }
+    console.log("here");
     var out_trade_no = generateOutTradeNo();
     var tenOrder = {
         out_trade_no: out_trade_no,
