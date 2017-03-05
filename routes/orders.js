@@ -57,7 +57,7 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
 });
 
 var middleware = api.middlewareForExpress();
-app.use('/wxpay/notify', middleware, function(req, res) {
+router.use('/wxpay/notify', middleware, function(req, res) {
     var payInfo = req.weixin;
     console.log(payInfo);
     var out_trade_no = payInfo.out_trade_no;
