@@ -61,7 +61,7 @@ app.use('/wxpay/notify', middleware, function(req, res) {
     var payInfo = req.weixin;
     console.log(payInfo);
     var out_trade_no = payInfo.out_trade_no;
-    Order.find({ out_trade_no: order.out_trade_no })
+    Order.find({ out_trade_no: order.out_trade_no, transaction_id: { $exists: false } })
         .exec()
         .then(function(data) {
             if (data.length > 0) {
