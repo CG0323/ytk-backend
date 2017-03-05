@@ -38,13 +38,11 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
         body: '扫码支付测试',
         total_fee: 0.1,
         trade_type: 'NATIVE',
-        notify_url: 'http://cg.dplink.com.cn/api/orders/wxpay/notify'
+        notify_url: 'http://cg.dplink.com.cn/api/orders/wxpay/notify',
+        product_id: '12months',
     }
     api.unifiedOrder(order, function(result) {
         console.log(result);
-        var order = {
-            out_trade_no: '商户内部订单号'
-        }
         api.closeOrder({ out_trade_no: tradeNo }, function(result) {
             console.log(result);
         });
