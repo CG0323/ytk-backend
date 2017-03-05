@@ -17,18 +17,6 @@ var wxpay = WXPay({
     // pfx: fs.readFileSync('./wxpay_cert.p12'),
 });
 
-var tenpay = require('tenpay');
-
-var tenConfig = {
-    appid: config.wxpay.app_id,
-    mchid: config.wxpay.mch_id,
-    partnerKey: config.wxpay.partner_key,
-    // pfx: require('fs').readFileSync('证书文件路径'),
-    // notify_url: '支付回调网址',
-    spbill_create_ip: '60.205.216.128'
-}
-var api = new tenpay(tenConfig);
-
 router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
     var order = req.body;
     if (order.out_trade_no) { // already crated wx order once, need to close it
@@ -44,7 +32,6 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
         trade_type: 'NATIVE',
         product_id: order.package
     }, function(err, result) {
-        console.log(result);
         if (err) {
             res.status(500).json({ message: err });
         }
@@ -62,49 +49,9 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
         });
     });
 
-    // var tenOrder = {
-    //     out_trade_no: out_trade_no,
-    //     body: '弈康通激活支付测试',
-    //     total_fee: Math.floor(order.total_fee * 100),
-    //     trade_type: 'NATIVE',
-    //     notify_url: config.wxpay.notify_url,
-    //     product_id: order.package
-    // }
-    // api.unifiedOrder(tenOrder, function(err, result) {
-    //     if (err) {
-    //         res.status(500).json({ message: err });
-    //     }
-    //     order.out_trade_no = out_trade_no;
-    //     order.user = req.user.iss;
-    //     order.payer_name = req.user.name;
-    //     var insertOrder = new Order(order);
-    //     insertOrder.save(function(err, savedOrder, numAffected) {
-    //         if (err) {
-    //             console.log(err);
-    //             res.status(500).json({ message: err });
-    //         } else {
-    //             res.status(200).json({ out_trade_no: out_trade_no, pay_url: result.code_url });
-    //         }
-    //     });
-    // });
-
 });
 
-// var middleware = api.middlewareForExpress();
-// router.use('/wxpay/notify', middleware, function(req, res) {
-//     var payInfo = req.weixin;
-//     console.log(payInfo);
-//     var out_trade_no = payInfo.out_trade_no;
-//     Order.find({ out_trade_no: payInfo.out_trade_no, transaction_id: { $exists: false } })
-//         .exec()
-//         .then(function(data) {
-//             if (data.length > 0) {
-//                 data[0].transaction_id = payInfo.transaction_id;
-//                 data[0].save();
-//                 res.success();
-//             }
-//         })
-// })
+
 
 router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
     // msg: 微信回调发送的数据
@@ -124,34 +71,6 @@ router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
 }));
 
 
-router.get('/wxpay/notify1/:tradeNo', function(req, res) {
-    var tradeNo = req.params.tradeNo;
-    // create the order in db
-    Order.find({ out_trade_no: tradeNo })
-        .exec()
-        .then(function(orders) {
-                if (orders.length > 0) {
-                    res.status(200).send("您的订单：" + tradeNo + "已成功支付。");
-                } else {
-                    var order = new Order();
-                    order.out_trade_no = tradeNo;
-                    order.save(function(err, savedOrder, numAffected) {
-                        if (err) {
-                            console.log(err);
-                            res.status(500).json({ message: err });
-                        } else {
-                            res.status(200).send("您的订单：" + tradeNo + "已成功支付。");
-                        }
-                    });
-                }
-            },
-            function(err) {
-                res.status(500).json({ message: err });
-            }
-        )
-
-})
-
 router.get('/query/:out_trade_no', jwt({ secret: secretCallback }), function(req, res) {
     var out_trade_no = req.params.out_trade_no;
     Order.find({ out_trade_no: out_trade_no, transaction_id: { $exists: true } })
@@ -165,38 +84,38 @@ router.get('/query/:out_trade_no', jwt({ secret: secretCallback }), function(req
         )
 })
 
-router.post('/', jwt({ secret: secretCallback }), function(req, res) {
-    var updated_order = req.body;
-    Order.find({ out_trade_no: updated_order.out_trade_no })
-        .exec()
-        .then(function(data) {
-                var setting;
-                if (data.length === 0) { // db is empty, create the first one
-                    res.status(500).json({ message: "该订单尚未完成支付" });
-                } else { // update existing one
-                    order = data[0];
-                    order.user = req.user.iss;
-                    order.payer_name = req.user.name;
-                    order.transaction_id = "1234567890123";
-                    order.order_date = new Date();
-                    order.total_fee = updated_order.total_fee;
-                    order.package = updated_order.package;
-                    order.student_usernames = updated_order.student_usernames;
-                    order.student_names = updated_order.student_names;
-                    order.save(function(err, savedOrder, numAffected) {
-                        if (err) {
-                            res.status(500).json({ message: err });
-                        } else {
-                            res.status(200).json({ message: "订单信息已成功保存" });
-                        }
-                    });
-                }
-            },
-            function(err) {
-                res.status(500).json({ message: err });
-            }
-        )
-});
+// router.post('/', jwt({ secret: secretCallback }), function(req, res) {
+//     var updated_order = req.body;
+//     Order.find({ out_trade_no: updated_order.out_trade_no })
+//         .exec()
+//         .then(function(data) {
+//                 var setting;
+//                 if (data.length === 0) { // db is empty, create the first one
+//                     res.status(500).json({ message: "该订单尚未完成支付" });
+//                 } else { // update existing one
+//                     order = data[0];
+//                     order.user = req.user.iss;
+//                     order.payer_name = req.user.name;
+//                     order.transaction_id = "1234567890123";
+//                     order.order_date = new Date();
+//                     order.total_fee = updated_order.total_fee;
+//                     order.package = updated_order.package;
+//                     order.student_usernames = updated_order.student_usernames;
+//                     order.student_names = updated_order.student_names;
+//                     order.save(function(err, savedOrder, numAffected) {
+//                         if (err) {
+//                             res.status(500).json({ message: err });
+//                         } else {
+//                             res.status(200).json({ message: "订单信息已成功保存" });
+//                         }
+//                     });
+//                 }
+//             },
+//             function(err) {
+//                 res.status(500).json({ message: err });
+//             }
+//         )
+// });
 
 //临时接口
 router.get('/clear', function(req, res, next) {
@@ -243,6 +162,7 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
             ]
         };
     }
+    conditions.transaction_id = { $exists: true };
     if (req.user.role === "老师") { // 老师只能查看自己的支付记录
         conditions.user = req.user.iss;
     }

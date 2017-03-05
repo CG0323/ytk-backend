@@ -1,45 +1,44 @@
 {
-  "name": "go-trainer-backend",
-  "version": "1.0.0",
-  "description": "The REST api for go-trainer project.",
-  "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node bin/www"
-  },
-  "keywords": [
-    "go",
-    "nodejs",
-    "REST",
-    "express",
-    "mongodb"
-  ],
-  "author": "CG0323",
-  "license": "MIT",
-  "dependencies": {
-    "basic-auth": "^1.1.0",
-    "body-parser": "^1.16.0",
-    "connect-mongo": "^1.3.2",
-    "cookie-parser": "^1.4.3",
-    "express": "^4.14.0",
-    "express-jwt": "^5.1.0",
-    "express-session": "^1.15.0",
-    "jsonwebtoken": "^7.3.0",
-    "log4js": "^1.1.0",
-    "moment": "^2.17.1",
-    "mongodb": "^2.2.21",
-    "mongoose": "^4.8.1",
-    "mongoose-deep-populate": "^3.0.0",
-    "morgan": "^1.7.0",
-    "node-wxpay": "^1.1.3",
-    "on-headers": "^1.0.1",
-    "passport": "^0.3.2",
-    "passport-local": "^1.0.0",
-    "passport-local-mongoose": "^4.0.0",
-    "q": "^1.4.1",
-    "tenpay": "^1.1.1",
-    "wechat": "^2.1.0",
-    "wechat-api": "^1.32.0",
-    "wechat-oauth": "^1.2.1"
-  }
+    "name": "go-trainer-backend",
+    "version": "1.0.0",
+    "description": "The REST api for go-trainer project.",
+    "main": "app.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node bin/www"
+    },
+    "keywords": [
+        "go",
+        "nodejs",
+        "REST",
+        "express",
+        "mongodb"
+    ],
+    "author": "CG0323",
+    "license": "MIT",
+    "dependencies": {
+        "basic-auth": "^1.1.0",
+        "body-parser": "^1.16.0",
+        "connect-mongo": "^1.3.2",
+        "cookie-parser": "^1.4.3",
+        "express": "^4.14.0",
+        "express-jwt": "^5.1.0",
+        "express-session": "^1.15.0",
+        "jsonwebtoken": "^7.3.0",
+        "log4js": "^1.1.0",
+        "moment": "^2.17.1",
+        "mongodb": "^2.2.21",
+        "mongoose": "^4.8.1",
+        "mongoose-deep-populate": "^3.0.0",
+        "morgan": "^1.7.0",
+        "node-wxpay": "^1.1.3",
+        "on-headers": "^1.0.1",
+        "passport": "^0.3.2",
+        "passport-local": "^1.0.0",
+        "passport-local-mongoose": "^4.0.0",
+        "q": "^1.4.1",
+        "wechat": "^2.1.0",
+        "wechat-api": "^1.32.0",
+        "wechat-oauth": "^1.2.1"
+    }
 }
