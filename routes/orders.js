@@ -10,6 +10,9 @@ var Order = require('../models/order')(db);
 var WXPay = require('node-wxpay');
 var fs = require("fs");
 
+
+console.log(config);
+
 var wxpay = WXPay({
     appid: config.wxpay.app_id,
     mch_id: config.wxpay.mch_id,
