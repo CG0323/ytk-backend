@@ -10,6 +10,13 @@ var Order = require('../models/order')(db);
 var WXPay = require('node-wxpay');
 var fs = require("fs");
 
+var wxpay = WXPay({
+    appid: config.wxpay.app_id,
+    mch_id: config.wxpay.mch_id,
+    partner_key: config.wxpay.partner_key,
+    // pfx: fs.readFileSync('./wxpay_cert.p12'),
+});
+
 var tenpay = require('tenpay');
 
 var tenConfig = {
@@ -27,17 +34,17 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
     if (order.out_trade_no) { // already crated wx order once, need to close it
         closeOrder(order);
     }
-    console.log("here");
     var out_trade_no = generateOutTradeNo();
-    var tenOrder = {
-        out_trade_no: out_trade_no,
+    wxpay.createUnifiedOrder({
         body: '弈康通激活支付测试',
+        out_trade_no: out_trade_no,
         total_fee: Math.floor(order.total_fee * 100),
-        trade_type: 'NATIVE',
+        spbill_create_ip: '192.168.2.210',
         notify_url: config.wxpay.notify_url,
+        trade_type: 'NATIVE',
         product_id: order.package
-    }
-    api.unifiedOrder(tenOrder, function(err, result) {
+    }, function(err, result) {
+        console.log(result);
         if (err) {
             res.status(500).json({ message: err });
         }
@@ -55,12 +62,54 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
         });
     });
 
+    // var tenOrder = {
+    //     out_trade_no: out_trade_no,
+    //     body: '弈康通激活支付测试',
+    //     total_fee: Math.floor(order.total_fee * 100),
+    //     trade_type: 'NATIVE',
+    //     notify_url: config.wxpay.notify_url,
+    //     product_id: order.package
+    // }
+    // api.unifiedOrder(tenOrder, function(err, result) {
+    //     if (err) {
+    //         res.status(500).json({ message: err });
+    //     }
+    //     order.out_trade_no = out_trade_no;
+    //     order.user = req.user.iss;
+    //     order.payer_name = req.user.name;
+    //     var insertOrder = new Order(order);
+    //     insertOrder.save(function(err, savedOrder, numAffected) {
+    //         if (err) {
+    //             console.log(err);
+    //             res.status(500).json({ message: err });
+    //         } else {
+    //             res.status(200).json({ out_trade_no: out_trade_no, pay_url: result.code_url });
+    //         }
+    //     });
+    // });
+
 });
 
-var middleware = api.middlewareForExpress();
-router.use('/wxpay/notify', middleware, function(req, res) {
-    var payInfo = req.weixin;
-    console.log(payInfo);
+// var middleware = api.middlewareForExpress();
+// router.use('/wxpay/notify', middleware, function(req, res) {
+//     var payInfo = req.weixin;
+//     console.log(payInfo);
+//     var out_trade_no = payInfo.out_trade_no;
+//     Order.find({ out_trade_no: payInfo.out_trade_no, transaction_id: { $exists: false } })
+//         .exec()
+//         .then(function(data) {
+//             if (data.length > 0) {
+//                 data[0].transaction_id = payInfo.transaction_id;
+//                 data[0].save();
+//                 res.success();
+//             }
+//         })
+// })
+
+router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
+    // msg: 微信回调发送的数据
+    var payInfo = msg;
+    console.log(payInfomsg);
     var out_trade_no = payInfo.out_trade_no;
     Order.find({ out_trade_no: payInfo.out_trade_no, transaction_id: { $exists: false } })
         .exec()
@@ -71,7 +120,7 @@ router.use('/wxpay/notify', middleware, function(req, res) {
                 res.success();
             }
         })
-})
+}));
 
 
 router.get('/wxpay/notify1/:tradeNo', function(req, res) {
