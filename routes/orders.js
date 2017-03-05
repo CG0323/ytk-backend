@@ -14,7 +14,7 @@ var wxpay = WXPay({
     appid: config.wxpay.app_id,
     mch_id: config.wxpay.mch_id,
     partner_key: config.partner_key,
-    pfx: fs.readFileSync('../apiclient_cert.p12'),
+    // pfx: fs.readFileSync('../apiclient_cert.p12')
 });
 
 router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
