@@ -13,7 +13,8 @@ var fs = require("fs");
 
 var tenpay = require('tenpay');
 
-var config = {
+
+var tenConfig = {
     appid: config.wxpay.app_id,
     mchid: config.wxpay.mch_id,
     partnerKey: config.partner_key,
@@ -21,7 +22,7 @@ var config = {
     // notify_url: '支付回调网址',
     spbill_create_ip: '60.205.216.128'
 }
-var api = new tenpay(config);
+var api = new tenpay(tenConfig);
 
 // var wxpay = WXPay({
 //     appid: config.wxpay.app_id,
