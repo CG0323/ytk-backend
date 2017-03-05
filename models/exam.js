@@ -8,7 +8,7 @@ var schema = new mongoose.Schema({
     directory_path: String,
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     exam_date: { type: Date },
-    duration: Number,
+    duration: Number, // in mm
     right_move_count: Number,
     right_count: Number,
     wrong_count: Number,
