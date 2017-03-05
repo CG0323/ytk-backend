@@ -13,7 +13,7 @@ var fs = require("fs");
 var wxpay = WXPay({
     appid: config.wxpay.app_id,
     mch_id: config.wxpay.mch_id,
-    partner_key: config.partner_key,
+    partner_key: config.parterner_key,
     // pfx: fs.readFileSync('../apiclient_cert.p12')
 });
 
