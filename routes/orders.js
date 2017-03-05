@@ -37,17 +37,15 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
         notify_url: config.wxpay.notify_url,
         product_id: order.package
     }
-    console.log("here111");
     api.unifiedOrder(tenOrder, function(err, result) {
         if (err) {
             res.status(500).json({ message: err });
         }
-        console.log("here222");
         order.out_trade_no = out_trade_no;
         order.user = req.user.iss;
         order.payer_name = req.user.name;
         var insertOrder = new Order(order);
-        order.save(function(err, savedOrder, numAffected) {
+        insertOrder.save(function(err, savedOrder, numAffected) {
             if (err) {
                 console.log(err);
                 res.status(500).json({ message: err });
