@@ -11,26 +11,35 @@ var WXPay = require('node-wxpay');
 var fs = require("fs");
 
 
-console.log(config);
+var tenpay = require('tenpay');
 
-var wxpay = WXPay({
+var config = {
     appid: config.wxpay.app_id,
-    mch_id: config.wxpay.mch_id,
-    partner_key: config.parterner_key,
-    // pfx: fs.readFileSync('../apiclient_cert.p12')
-});
+    mchid: config.wxpay.mch_id,
+    partnerKey: config.partner_key,
+    // pfx: require('fs').readFileSync('证书文件路径'),
+    // notify_url: '支付回调网址',
+    spbill_create_ip: '60.205.216.128'
+}
+var api = new tenpay(config);
+
+// var wxpay = WXPay({
+//     appid: config.wxpay.app_id,
+//     mch_id: config.wxpay.mch_id,
+//     partner_key: config.partner_key,
+//     // pfx: fs.readFileSync('../apiclient_cert.p12')
+// });
 
 router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
     var tradeNo = generateOutTradeNo();
-    wxpay.createUnifiedOrder({
-        body: '扫码支付测试',
+    var order = {
         out_trade_no: tradeNo,
-        total_fee: 1,
-        spbill_create_ip: '60.205.216.128',
-        notify_url: 'http://cg.dplink.com.cn/api/orders/wxpay/notify',
+        body: '扫码支付测试',
+        total_fee: 0.1,
         trade_type: 'NATIVE',
-        product_id: '1234567890'
-    }, function(err, result) {
+        notify_url: 'http://cg.dplink.com.cn/api/orders/wxpay/notify'
+    }
+    api.unifiedOrder(order, function(err, result) {
         console.log(result);
         wxpay.closeOrder({ out_trade_no: tradeNo }, function(err, result) {
             console.log("=============close order===========");
@@ -38,6 +47,23 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
         });
     });
     res.status(200).json({ tradeNo: tradeNo });
+
+    // wxpay.createUnifiedOrder({
+    //     body: '扫码支付测试',
+    //     out_trade_no: tradeNo,
+    //     total_fee: 1,
+    //     spbill_create_ip: '60.205.216.128',
+    //     notify_url: 'http://cg.dplink.com.cn/api/orders/wxpay/notify',
+    //     trade_type: 'NATIVE',
+    //     product_id: '1234567890'
+    // }, function(err, result) {
+    //     console.log(result);
+    //     wxpay.closeOrder({ out_trade_no: tradeNo }, function(err, result) {
+    //         console.log("=============close order===========");
+    //         console.log(result);
+    //     });
+    // });
+
 });
 
 router.get('/wxpay/notify1/:tradeNo', function(req, res) {
