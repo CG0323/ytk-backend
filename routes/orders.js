@@ -32,7 +32,7 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
     var tenOrder = {
         out_trade_no: out_trade_no,
         body: '弈康通激活支付测试',
-        total_fee: Math.floor(rder.total_fee * 100),
+        total_fee: Math.floor(order.total_fee * 100),
         trade_type: 'NATIVE',
         notify_url: config.wxpay.notify_url,
         product_id: order.package
