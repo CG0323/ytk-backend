@@ -109,7 +109,7 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
 router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
     // msg: 微信回调发送的数据
     var payInfo = msg;
-    console.log(payInfomsg);
+    console.log(payInfo);
     var out_trade_no = payInfo.out_trade_no;
     Order.find({ out_trade_no: payInfo.out_trade_no, transaction_id: { $exists: false } })
         .exec()
