@@ -41,9 +41,9 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
         notify_url: 'http://cg.dplink.com.cn/api/orders/wxpay/notify',
         product_id: '12months',
     }
-    api.unifiedOrder(order, function(result) {
+    api.unifiedOrder(order, function(err, result) {
         console.log(result);
-        api.closeOrder({ out_trade_no: tradeNo }, function(result) {
+        api.closeOrder({ out_trade_no: tradeNo }, function(err, result) {
             console.log(result);
         });
     });
