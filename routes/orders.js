@@ -40,10 +40,12 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
         trade_type: 'NATIVE',
         notify_url: 'http://cg.dplink.com.cn/api/orders/wxpay/notify'
     }
-    api.unifiedOrder(order, function(err, result) {
+    api.unifiedOrder(order, function(result) {
         console.log(result);
-        wxpay.closeOrder({ out_trade_no: tradeNo }, function(err, result) {
-            console.log("=============close order===========");
+        var order = {
+            out_trade_no: '商户内部订单号'
+        }
+        api.closeOrder({ out_trade_no: tradeNo }, function(result) {
             console.log(result);
         });
     });
