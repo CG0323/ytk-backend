@@ -62,12 +62,13 @@ router.use('/wxpay/notify', middleware, function(req, res) {
     var payInfo = req.weixin;
     console.log(payInfo);
     var out_trade_no = payInfo.out_trade_no;
-    Order.find({ out_trade_no: order.out_trade_no, transaction_id: { $exists: false } })
+    Order.find({ out_trade_no: payInfo.out_trade_no, transaction_id: { $exists: false } })
         .exec()
         .then(function(data) {
             if (data.length > 0) {
                 data[0].transaction_id = payInfo.transaction_id;
                 data[0].save();
+                res.success();
             }
         })
 })
