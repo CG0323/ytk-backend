@@ -17,7 +17,7 @@ var tenpay = require('tenpay');
 var tenConfig = {
     appid: config.wxpay.app_id,
     mchid: config.wxpay.mch_id,
-    partnerKey: config.partner_key,
+    partnerKey: config.wxpay.partner_key,
     // pfx: require('fs').readFileSync('证书文件路径'),
     // notify_url: '支付回调网址',
     spbill_create_ip: '60.205.216.128'
