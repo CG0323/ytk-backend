@@ -19,8 +19,8 @@ var wxpay = WXPay({
 
 router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
     var order = req.body;
-    if (order.out_trade_no) { // already crated wx order once, need to close it
-        closeOrder(order);
+    if (order.out_trade_no) { // already created wx order once, need to close it
+        closeOrder(order.out_trade_no);
     }
     var out_trade_no = generateOutTradeNo();
     wxpay.createUnifiedOrder({
@@ -86,15 +86,7 @@ router.get('/query/:out_trade_no', jwt({ secret: secretCallback }), function(req
 
 router.delete('/:out_trade_no', jwt({ secret: secretCallback }), function(req, res, next) {
     var out_trade_no = req.params.out_trade_no;
-    Order.remove({ out_trade_no: out_trade_no, transaction_id: { $exists: false } })
-        .exec()
-        .then(function(data) {
-                res.json({ message: "未支付订单已成功删除" });
-            },
-            function(err) {
-                res.status(500).json({ error: err, message: "未支付订单删除失败" });
-            }
-        )
+    closeOrder(out_trade_no);
 });
 
 // router.post('/', jwt({ secret: secretCallback }), function(req, res) {
@@ -219,13 +211,13 @@ function generateOutTradeNo() {
     return prefix + random;
 }
 
-function closeOrder(order) {
-    Order.find({ out_trade_no: order.out_trade_no, transaction_id: { $exists: false } })
+function closeOrder(out_trade_no) {
+    Order.find({ out_trade_no: out_trade_no, transaction_id: { $exists: false } })
         .exec()
         .then(function(data) {
             if (data.length > 0) {
-                api.closeOrder({ out_trade_no: order.out_trade_no });
-                Order.remove({ out_trade_no: order.out_trade_no, transaction_id: { $exists: false } });
+                api.closeOrder({ out_trade_no: out_trade_no });
+                Order.remove({ out_trade_no: out_trade_no, transaction_id: { $exists: false } });
             }
         })
 }
