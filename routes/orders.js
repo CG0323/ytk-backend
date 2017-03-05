@@ -10,9 +10,7 @@ var Order = require('../models/order')(db);
 var WXPay = require('node-wxpay');
 var fs = require("fs");
 
-
 var tenpay = require('tenpay');
-
 
 var tenConfig = {
     appid: config.wxpay.app_id,
@@ -24,46 +22,30 @@ var tenConfig = {
 }
 var api = new tenpay(tenConfig);
 
-// var wxpay = WXPay({
-//     appid: config.wxpay.app_id,
-//     mch_id: config.wxpay.mch_id,
-//     partner_key: config.partner_key,
-//     // pfx: fs.readFileSync('../apiclient_cert.p12')
-// });
-
 router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
-    var tradeNo = generateOutTradeNo();
-    var order = {
-        out_trade_no: tradeNo,
+    var order = req.body;
+    if (order.out_trade_no) { // already crated wx order once, need to close it
+        api.closeOrder({ out_trade_no: order.out_trade_no })
+    }
+
+    var out_trade_no = generateOutTradeNo();
+    var tenOrder = {
+        out_trade_no: out_trade_no,
         body: '扫码支付测试',
         total_fee: 1,
         trade_type: 'NATIVE',
         notify_url: 'http://cg.dplink.com.cn/api/orders/wxpay/notify',
         product_id: '12months',
     }
-    api.unifiedOrder(order, function(err, result) {
-        console.log(result);
-        api.closeOrder({ out_trade_no: tradeNo }, function(err, result) {
-            console.log(result);
-        });
+    api.unifiedOrder(tenOrder, function(err, result) {
+        if (err) {
+            res.status(500).json({ message: err });
+        }
+        res.status(200).json({ out_trade_no: out_trade_no, pay_url: result.code_url });
+        // api.closeOrder({ out_trade_no: tradeNo }, function(err, result) {
+        //     console.log(result);
+        // });
     });
-    res.status(200).json({ tradeNo: tradeNo });
-
-    // wxpay.createUnifiedOrder({
-    //     body: '扫码支付测试',
-    //     out_trade_no: tradeNo,
-    //     total_fee: 1,
-    //     spbill_create_ip: '60.205.216.128',
-    //     notify_url: 'http://cg.dplink.com.cn/api/orders/wxpay/notify',
-    //     trade_type: 'NATIVE',
-    //     product_id: '1234567890'
-    // }, function(err, result) {
-    //     console.log(result);
-    //     wxpay.closeOrder({ out_trade_no: tradeNo }, function(err, result) {
-    //         console.log("=============close order===========");
-    //         console.log(result);
-    //     });
-    // });
 
 });
 
