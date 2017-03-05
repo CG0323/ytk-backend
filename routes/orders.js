@@ -84,6 +84,19 @@ router.get('/query/:out_trade_no', jwt({ secret: secretCallback }), function(req
         )
 })
 
+router.delete('/:out_trade_no', jwt({ secret: secretCallback }), function(req, res, next) {
+    var out_trade_no = req.params.out_trade_no;
+    Order.remove({ out_trade_no: out_trade_no, transaction_id: { $exists: false } })
+        .exec()
+        .then(function(data) {
+                res.json({ message: "未支付订单已成功删除" });
+            },
+            function(err) {
+                res.status(500).json({ error: err, message: "未支付订单删除失败" });
+            }
+        )
+});
+
 // router.post('/', jwt({ secret: secretCallback }), function(req, res) {
 //     var updated_order = req.body;
 //     Order.find({ out_trade_no: updated_order.out_trade_no })
