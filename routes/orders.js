@@ -74,11 +74,13 @@ router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
             }
         })
         .then(function(order) {
-            console.log(order);
+
             var addMonth = order.package == "12个月" ? 12 : 3;
             var usernames = order.student_usernames.split(";");
+            console.log(usernames);
             for (var i = 0; i < usernames; i++) {
                 var username = usernames[i];
+                console.log(username);
                 User.findOne({ username: username })
                     .exec()
                     .then(function(user) {
