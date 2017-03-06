@@ -249,8 +249,7 @@ function closeOrder(out_trade_no) {
         .exec()
         .then(function(data) {
             if (data.length > 0) {
-                console.log("close");
-                api.closeOrder({ out_trade_no: out_trade_no });
+                wxpay.closeOrder({ out_trade_no: out_trade_no });
                 Order.remove({ out_trade_no: out_trade_no, transaction_id: { $exists: false } });
             }
         })
