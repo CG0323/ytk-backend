@@ -61,7 +61,6 @@ router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
     if (payInfo.return_code != "SUCCESS" || payInfo.result_code != "SUCCESS") {
         return;
     }
-    console.log(payInfo);
     var out_trade_no = payInfo.out_trade_no;
     Order.find({ out_trade_no: payInfo.out_trade_no, transaction_id: { $exists: false } })
         .exec()
@@ -75,6 +74,7 @@ router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
             }
         })
         .then(function(order) {
+            console.log(order);
             var addMonth = order.package == "12个月" ? 12 : 3;
             var usernames = order.student_usernames.split(";");
             for (var i = 0; i < usernames; i++) {
