@@ -74,29 +74,28 @@ router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
             }
         })
         .then(function(order) {
-
             var addMonth = order.package == "12个月" ? 12 : 3;
             var usernames = order.student_usernames.split(";");
-            console.log(usernames);
-            for (var i = 0; i < usernames; i++) {
+            for (var i = 0; i < usernames.length; i++) {
                 var username = usernames[i];
-                console.log(username);
-                User.findOne({ username: username })
+                User.find({ username: username })
                     .exec()
-                    .then(function(user) {
-                        var expired_at = user.expired_at;
-                        let expiration = null;
-                        if (expired_at) {
-                            expiration = new Date(expired_at);
-                            expiration.setMonth(expiration.getMonth() + addMonth);
-                        } else {
-                            let d = new Date();
-                            d.setMonth(d.getMonth() + addMonth)
-                            expiration = d;
+                    .then(function(users) {
+                        if (users.length > 0) {
+                            var user = users[0];
+                            var expired_at = user.expired_at;
+                            let expiration = null;
+                            if (expired_at) {
+                                expiration = new Date(expired_at);
+                                expiration.setMonth(expiration.getMonth() + addMonth);
+                            } else {
+                                let d = new Date();
+                                d.setMonth(d.getMonth() + addMonth)
+                                expiration = d;
+                            }
+                            user.expired_at = expiration;
+                            user.save();
                         }
-                        user.expired_at = expiration;
-                        user.save();
-                        // res.success();
                     }, function(err) {
                         logger.error("更新学员有效期失败：" + err);
                     })
