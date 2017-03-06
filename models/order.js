@@ -12,7 +12,7 @@ var schema = new mongoose.Schema({
     total_fee: Number,
     package: String, //12月,3月
     student_usernames: String,
-    student_names: String,
+    student_names: String
 });
 
 

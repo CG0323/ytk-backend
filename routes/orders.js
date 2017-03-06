@@ -7,6 +7,7 @@ var config = require('../common.js').config();
 var logger = require('../utils/logger.js');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
 var Order = require('../models/order')(db);
+var User = require('../models/user')(db);
 var WXPay = require('node-wxpay');
 var fs = require("fs");
 
@@ -55,6 +56,7 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
 
 router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
     // msg: 微信回调发送的数据
+    res.success()
     var payInfo = msg;
     console.log(payInfo);
     var out_trade_no = payInfo.out_trade_no;
@@ -62,10 +64,37 @@ router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
         .exec()
         .then(function(data) {
             if (data.length > 0) {
-                data[0].transaction_id = payInfo.transaction_id;
-                data[0].order_date = new Date();
-                data[0].save();
-                res.success();
+                var order = data[0];
+                order.transaction_id = payInfo.transaction_id;
+                order.order_date = new Date();
+                order.save();
+                return order;
+                // res.success();
+            }
+        })
+        .then(function(order) {
+            var addMonth = order.package == "12个月" ? 12 : 3;
+            var usernames = order.student_usernames.split(";");
+            for (var i = 0; i < usernames; i++) {
+                var username = usernames[i];
+                User.findOne({ username: username })
+                    .exec()
+                    .then(function(user) {
+                        var expired_at = user.expired_at;
+                        let expiration = null;
+                        if (expired_at) {
+                            expiration = new Date(expired_at);
+                            expiration.setMonth(expiration.getMonth() + addMonth);
+                        } else {
+                            let d = new Date();
+                            d.setMonth(d.getMonth() + addMonth)
+                            expiration = d;
+                        }
+                        user.expired_at = expiration;
+                        user.save();
+                    }, function(err) {
+                        logger.error("更新学员有效期失败：" + err);
+                    })
             }
         })
 }));
