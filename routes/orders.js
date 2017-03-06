@@ -56,7 +56,11 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
 
 router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
     // msg: 微信回调发送的数据
+    res.success();
     var payInfo = msg;
+    if (payInfo.return_code != "SUCCESS" || payInfo.result_code != "SUCCESS") {
+        return;
+    }
     console.log(payInfo);
     var out_trade_no = payInfo.out_trade_no;
     Order.find({ out_trade_no: payInfo.out_trade_no, transaction_id: { $exists: false } })
@@ -90,7 +94,7 @@ router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
                         }
                         user.expired_at = expiration;
                         user.save();
-                        res.success();
+                        // res.success();
                     }, function(err) {
                         logger.error("更新学员有效期失败：" + err);
                     })
