@@ -24,37 +24,49 @@ router.get('/me', jwt({ secret: secretCallback }), function(req, res) {
 });
 
 // 临时接口
-router.get('/register-admin', function(req, res) {
-    User.register(new User({ username: config.admin_username, name: '管理员', role: '管理员', expired_at: new Date("2030-12-31") }), config.admin_password, function(err, user) {
+router.get('/register-admin1', function(req, res) {
+    User.register(new User({ username: config.admin1_username, name: '王工', role: '管理员', expired_at: new Date("2030-12-31") }), config.admin1_password, function(err, user) {
         if (err) {
             logger.error(err);
             res.status(500).send(err);
         } else {
-            res.status(200).json({ status: '管理员注册成功' });
+            res.status(200).json({ status: '管理员1注册成功' });
         }
     });
 });
 
 // 临时接口
-router.get('/register-teacher', function(req, res) {
-    User.register(new User({ username: config.teacher_username, name: '祝老师', role: '老师', init_password: config.teacher_password, expired_at: new Date("2030-12-31") }), config.teacher_password, function(err, user) {
+router.get('/register-admin2', function(req, res) {
+    User.register(new User({ username: config.admin2_username, name: '祝工', role: '管理员', expired_at: new Date("2030-12-31") }), config.admin2_password, function(err, user) {
         if (err) {
             logger.error(err);
             res.status(500).send(err);
         } else {
-            res.status(200).json({ status: '老师注册成功' });
+            res.status(200).json({ status: '管理员1注册成功' });
         }
     });
 });
 
 // 临时接口
-router.get('/register-teacher2', function(req, res) {
-    User.register(new User({ username: config.teacher2_username, name: '王老师', role: '老师', init_password: config.teacher_password, expired_at: new Date("2030-12-31") }), config.teacher_password, function(err, user) {
+router.get('/register-admin3', function(req, res) {
+    User.register(new User({ username: config.admin3_username, name: '朱总', role: '管理员', expired_at: new Date("2030-12-31") }), config.admin3_password, function(err, user) {
         if (err) {
             logger.error(err);
             res.status(500).send(err);
         } else {
-            res.status(200).json({ status: '老师注册成功' });
+            res.status(200).json({ status: '管理员1注册成功' });
+        }
+    });
+});
+
+// 临时接口
+router.get('/register-admin4', function(req, res) {
+    User.register(new User({ username: config.admin4_username, name: '肖总', role: '管理员', expired_at: new Date("2030-12-31") }), config.admin4_password, function(err, user) {
+        if (err) {
+            logger.error(err);
+            res.status(500).send(err);
+        } else {
+            res.status(200).json({ status: '管理员1注册成功' });
         }
     });
 });
