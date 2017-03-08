@@ -184,8 +184,12 @@ router.post('/student', jwt({ secret: secretCallback }), function(req, res) {
         if (users.length > 0) {
             res.status(400).json({ message: '用户名已被使用' });
         } else {
-            Settings.findOne({})
-                .then(function(settings) {
+            var settings = getDefaultSettings();
+            Settings.find({})
+                .then(function(data) {
+                    if (data.length > 0) {
+                        settings = data[0];
+                    }
                     var expired_at = moment().add(settings.trial_days, 'days');
                     User.register(new User({ teacher: user.iss, username: data.username, name: data.name, role: "学员", init_password: data.password, expired_at: expired_at }), data.password, function(err, savedUser) {
                         if (err) {
@@ -474,6 +478,18 @@ function generateSecret() {
 
     var random = base + Math.floor(Math.random() * fill);
     return random.toString();
+}
+
+function getDefaultSettings() {
+    var settings = {};
+    settings.price_3_months = 10;
+    settings.price_12_months = 30;
+    settings.trial_days = 15;
+    settings.exam_duration = 3;
+    settings.score_per_turn = 10;
+    settings.time_bonus_per_second = 5;
+    settings.default_pass_score = 600;
+    return settings;
 }
 
 
