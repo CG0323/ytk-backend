@@ -30,7 +30,8 @@ router.get('/', function(req, res, next) {
         )
 });
 
-router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
+// router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
+router.get('/tree', function(req, res, next) {
     var passed_directories = [];
     //first get list of passed directories
     Exam.find({ user: req.user.iss, status: "达标" }, { directory: 1, _id: 0 })
