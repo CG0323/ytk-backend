@@ -30,8 +30,7 @@ router.get('/', function(req, res, next) {
         )
 });
 
-// router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
-router.get('/tree', function(req, res, next) {
+router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
     var passed_directories = [];
     //first get list of passed directories
     Exam.find({ user: req.user.iss, status: "达标" }, { directory: 1, _id: 0 })
@@ -62,7 +61,29 @@ router.get('/tree', function(req, res, next) {
                     }
                 )
         })
+});
 
+router.get('/testtree', jwt({ secret: secretCallback }), function(req, res, next) {
+    Directory.find({ parent: { $exists: false } })
+        .exec()
+        .then(function(directories) {
+                var promises = [];
+                directories.forEach(function(directory) {
+                    promises.push(getNode(directory, passed_directories));
+                });
+                Q.all(promises)
+                    .then(function(items) {
+                        root.items = items;
+                        res.status(200).json(items);
+                    }, function(err) {
+                        res.status(500).send(err);
+                    })
+
+            },
+            function(err) {
+                res.status(500).send(err);
+            }
+        )
 
 
 });
