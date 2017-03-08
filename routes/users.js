@@ -103,12 +103,12 @@ router.post('/login', function(req, res, next) {
             var secret = generateSecret();
             user.last_key = secret;
             user.save(); // no check for now, not sure if it is ok
-            var payload = { iss: user._id, role: user.role };
-            if (user.role === "老师") {
-                payload.name = user.name;
-            }
+            var payload = { iss: user._id, role: user.role, name: user.name };
+            // if (user.role === "老师") {
+            //     payload.name = user.name;
+            // }
             var token = jwt_generator.sign(payload, secret, { expiresIn: '24h' });
-            logger.info(user.name + " 登录系统。" + req.clientIP);
+            logger.info(user.name + " 登录系统。");
             if (user.role != "学员") {
                 res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at });
             } else { //if it is student, get teacher info
@@ -137,10 +137,10 @@ router.get('/token', jwt({ secret: secretCallback }), function(req, res) {
         if (user_expired_in < 24) {
             expiresIn = Math.floor(user_expired_in) + 'h';
         }
-        var payload = { iss: user._id, role: user.role };
-        if (user.role === "老师") {
-            payload.name = user.name;
-        }
+        var payload = { iss: user._id, role: user.role, name: user.name };
+        // if (user.role === "老师") {
+        //     payload.name = user.name;
+        // }
         // var token = jwt_generator.sign({ iss: user_id, _id: user._id, username: user.username, name: user.name, role: user.role }, secret, { expiresIn: expiresIn });
         var token = jwt_generator.sign(payload, secret, { expiresIn: expiresIn });
         res.status(200).json({ token: token });
@@ -213,7 +213,7 @@ router.delete('/:id', jwt({ secret: secretCallback }), function(req, res) {
             logger.error(err);
             res.status(500).json({ message: err });
         }
-        logger.info(req.user.iss + " 删除了 " + req.params.id + " 的账号" + req.clientIP);
+        logger.info(req.user.name + " 删除了 " + req.params.id + " 的账号");
         res.json({ message: '账号已成功删除' });
     });
 });
@@ -392,7 +392,7 @@ router.post('/mail', jwt({ secret: secretCallback }), function(req, res) {
                 logger.error(err);
                 res.status(500).json({ message: err });
             }
-            logger.info(user.username + " 更新了通知信息" + "。" + req.clientIP);
+            logger.info(user.username + " 更新了通知信息" + "。");
             res.json({ message: '通知栏已成功设置' });
         });
     });
@@ -412,7 +412,7 @@ router.put('/:id', jwt({ secret: secretCallback }), function(req, res) {
                 res.status(500).json({ message: err });
             }
 
-            logger.info(req.user.iss + " 更新了用户账号，用户名为：" + user.username + "。" + req.clientIP);
+            logger.info(req.user.name + " 更新了用户账号，用户名为：" + user.username + "。");
             res.json({ message: '用户账号已成功更新' });
         });
     });
@@ -434,7 +434,7 @@ router.post('/resetpsw', jwt({ secret: secretCallback }), function(req, res) {
                         logger.error(err);
                         res.status(400).json({ message: '密码修改失败' });
                     }
-                    logger.info(req.user.iss + " 重置了用户" + user.username + "的密码。" + req.clientIP);
+                    logger.info(req.user.name + " 重置了用户" + user.username + "的密码。");
                     res.status(200).json({ message: '用户密码已成功重置' });
                 });
             });
@@ -458,7 +458,7 @@ router.post('/changepsw', jwt({ secret: secretCallback }), function(req, res) {
                             logger.error(err);
                             res.status(400).json({ message: '密码修改失败' });
                         }
-                        logger.info(user.name + " 修改了密码。" + req.clientIP);
+                        logger.info(user.name + " 修改了密码。");
                         res.status(200).json({ message: '用户密码已成功更新' });
                     });
                 });

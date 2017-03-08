@@ -22,7 +22,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
                     logger.error(err);
                     res.json({ error: err, message: "更新证书失败" });
                 }
-                logger.info(req.user.iss + " 更新了证书，证书编号为：" + certificate.certificate_id + "。" + req.clientIP);
+                logger.info(req.user.iss + " 更新了证书，证书编号为：" + certificate.certificate_id + "。");
                 res.json({ message: '证书已成功更新' });
             });
         } else {

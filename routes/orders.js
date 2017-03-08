@@ -114,6 +114,7 @@ router.get('/query/:out_trade_no', jwt({ secret: secretCallback }), function(req
                 res.json(orders);
             },
             function(err) {
+                logger.error("查询订单失败。" + err);
                 res.status(500).json({ message: err });
             }
         )
@@ -225,6 +226,7 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
                 });
             },
             function(err) {
+                logger.error("搜索订单失败。" + err)
                 res.status(500).json({ message: err });
             }
         )

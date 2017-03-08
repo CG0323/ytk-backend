@@ -64,7 +64,7 @@ app.use(function(err, req, res, next) {
 });
 
 function log4jsLogger(req, res, next) {
-    req.clientIP = getClientIp(req);
+    // req.clientIP = getClientIp(req);
     next();
 }
 
