@@ -186,9 +186,9 @@ router.post('/student', jwt({ secret: secretCallback }), function(req, res) {
         } else {
             var settings = getDefaultSettings();
             Settings.find({})
-                .then(function(data) {
-                    if (data.length > 0) {
-                        settings = data[0];
+                .then(function(settingsList) {
+                    if (settingsList.length > 0) {
+                        settings = settingsList[0];
                     }
                     var expired_at = moment().add(settings.trial_days, 'days');
                     User.register(new User({ teacher: user.iss, username: data.username, name: data.name, role: "学员", init_password: data.password, expired_at: expired_at }), data.password, function(err, savedUser) {
