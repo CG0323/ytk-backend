@@ -30,8 +30,7 @@ router.get('/', jwt({ secret: secretCallback }), function(req, res, next) {
         )
 });
 
-// router.get('/directories/:id', jwt({ secret: secretCallback }), function(req, res, next) {
-router.get('/directories/:id', function(req, res, next) {
+router.get('/directories/:id', jwt({ secret: secretCallback }), function(req, res, next) {
     Problem.find({ parent: req.params.id })
         .deepPopulate('parent.parent.parent')
         .exec()

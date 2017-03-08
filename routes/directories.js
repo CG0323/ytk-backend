@@ -63,32 +63,6 @@ router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
         })
 });
 
-router.get('/testtree', function(req, res, next) {
-    var passed_directories = [];
-    Directory.find({ parent: { $exists: false } })
-        .exec()
-        .then(function(directories) {
-                var promises = [];
-                directories.forEach(function(directory) {
-                    promises.push(getNode(directory, passed_directories));
-                });
-                Q.all(promises)
-                    .then(function(items) {
-                        root.items = items;
-                        res.status(200).json(items);
-                    }, function(err) {
-                        res.status(500).send(err);
-                    })
-
-            },
-            function(err) {
-                res.status(500).send(err);
-            }
-        )
-
-
-});
-
 function getChildren(parent, passed_directories) {
     var defer = Q.defer();
     var deepPopulate = '';
