@@ -25,7 +25,7 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
     }
     var out_trade_no = generateOutTradeNo();
     wxpay.createUnifiedOrder({
-        body: '弈康通激活支付测试',
+        body: '弈通康激活支付测试',
         out_trade_no: out_trade_no,
         total_fee: Math.floor(order.total_fee * 100),
         spbill_create_ip: '192.168.2.210',
