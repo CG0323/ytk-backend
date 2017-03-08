@@ -63,7 +63,7 @@ router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
         })
 });
 
-router.get('/testtree', jwt({ secret: secretCallback }), function(req, res, next) {
+router.get('/testtree', function(req, res, next) {
     Directory.find({ parent: { $exists: false } })
         .exec()
         .then(function(directories) {
