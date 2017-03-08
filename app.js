@@ -34,7 +34,7 @@ app.use(function(req, res, next) {
 
 app.use('/api', apis);
 app.use('/users', users);
-app.use('/wechat', wechat);
+// app.use('/wechat', wechat);
 
 // passport config
 var User = require('./models/user')(db);
