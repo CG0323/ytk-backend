@@ -79,6 +79,7 @@ router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
             for (var i = 0; i < usernames.length; i++) {
                 var username = usernames[i];
                 User.find({ username: username })
+                    .populate('teacher')
                     .exec()
                     .then(function(users) {
                         if (users.length > 0) {
@@ -95,6 +96,7 @@ router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
                             }
                             user.expired_at = expiration;
                             user.save();
+                            logger.info(user.teacher.name + "用微信支付了订单：" + order.out_trade_no);
                         }
                     }, function(err) {
                         logger.error("更新学员有效期失败：" + err);

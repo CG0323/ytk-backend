@@ -8,28 +8,6 @@ var logger = require('../utils/logger.js');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
 var Settings = require('../models/settings')(db);
 var Exam = require('../models/exam')(db);
-//initialize with default settings
-// Settings.find()
-//     .exec()
-//     .then(function(data) {
-//             console.log("I am in settings default initial");
-//             if (data.length === 0) {
-//                 var settings = new Settings();
-//                 settings.price_3_months = 10;
-//                 settings.price_12_months = 30;
-//                 settings.trial_days = 15;
-//                 settings.exam_duration = 3;
-//                 settings.score_per_turn = 10;
-//                 settings.time_bonus_per_second = 5;
-//                 settings.default_pass_score = 600;
-//                 settings.save();
-//             }
-//         },
-//         function(err) {
-//             logger.err("settings 初始化失败");
-//         }
-//     )
-
 
 router.get('/', function(req, res, next) {
     Settings.find()
@@ -78,6 +56,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
                     if (err) {
                         res.status(500).json({ message: err });
                     } else {
+                        logger.info(req.user.name + "修改了系统配置参数");
                         res.status(200).json({ message: "系统配置已成功保存" });
                     }
                 });
