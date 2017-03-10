@@ -12,7 +12,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
     var data = req.body;
     var correct = data.correct;
     if (correct) { // remove from database if exist
-        WrongRecord.remove({ user: user._id, problem: data.problem })
+        WrongRecord.remove({ user: user.iss, problem: data.problem })
             .exec()
             .then(function(data) {
                     res.json({ message: "错题记录已成功删除" });
@@ -22,14 +22,14 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
                 }
             )
     } else { // add to database if not exist
-        WrongRecord.find({ user: user._id, problem: data.problem })
+        WrongRecord.find({ user: user.iss, problem: data.problem })
             .exec()
             .then(function(records) {
                 if (records.length > 0) { //aready exist
                     res.status(200).json({ message: "一错再错..." })
                 } else {
                     var wrongRecord = new WrongRecord(data);
-                    wrongRecord.user = user._id;
+                    wrongRecord.user = user.iss;
                     wrongRecord.save(function(err, savedRecord, numAffected) {
                         if (err) {
                             res.status(500).send(err);
@@ -44,7 +44,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
 
 router.get('/', jwt({ secret: secretCallback }), function(req, res, next) {
     var user = req.user;
-    WrongRecord.find({ user: user._id })
+    WrongRecord.find({ user: user.iss })
         .exec()
         .then(function(records) {
                 var problems = records.map(rec => rec.problem);
@@ -58,7 +58,7 @@ router.get('/', jwt({ secret: secretCallback }), function(req, res, next) {
 
 router.get('/withcontent', jwt({ secret: secretCallback }), function(req, res, next) {
     var user = req.user;
-    WrongRecord.find({ user: user._id })
+    WrongRecord.find({ user: user.iss })
         .deepPopulate('problem.parent.parent.parent')
         .exec()
         .then(function(records) {
@@ -79,7 +79,7 @@ router.get('/withcontent', jwt({ secret: secretCallback }), function(req, res, n
         )
 });
 
-router.get('/user/:userId', function(req, res, next) {
+router.get('/user/:userId', jwt({ secret: secretCallback }), function(req, res, next) {
     var userId = req.params.userId;
     WrongRecord.find({ user: userId })
         .populate('problem')
@@ -88,7 +88,7 @@ router.get('/user/:userId', function(req, res, next) {
                 res.json(records);
             },
             function(err) {
-                res.status(500).end();
+                res.status(500).json({ message: err });
             }
         )
 });

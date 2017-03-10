@@ -12,11 +12,11 @@ var menu = JSON.stringify(require('../data/menu.json'));
 var client = new OAuth(config.wechat.app_id, config.wechat.app_secret);
 var api = new WechatAPI(config.wechat.app_id, config.wechat.app_secret);
 
-api.createMenu(menu, function(err, result) {
-    if (err) {
-        console.log(err);
-    }
-});
+// api.createMenu(menu, function(err, result) {
+//     if (err) {
+//         console.log(err);
+//     }
+// });
 
 router.get('/', wechat(config.wechat.token, function(req, res, next) {
     res.writeHead(200);

@@ -6,6 +6,8 @@ var jwt = require('express-jwt');
 var router = express.Router();
 var Q = require('q');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
+var Exam = require('../models/exam.js')(db);
+var jwt = require('express-jwt');
 
 router.post('/', jwt({ secret: secretCallback }),function(req, res) {
     var data = req.body;
@@ -74,35 +76,48 @@ router.get('/', jwt({ secret: secretCallback }),function(req, res, next) {
         )
 });
 
-router.get('/tree', jwt({ secret: secretCallback }),function(req, res, next) {
-    var root = { label: '练习题库', items: [] };
-    Directory.find({ parent: { $exists: false } })
+
+router.get('/tree', jwt({ secret: secretCallback }), function(req, res, next) {
+    var passed_directories = [];
+    //first get list of passed directories
+    Exam.find({ user: req.user.iss, status: "达标" }, { directory: 1, _id: 0 })
         .exec()
-        .then(function(directories) {
-                var promises = [];
-                directories.forEach(function(directory) {
-                    promises.push(getNode(directory));
-                });
-                Q.all(promises)
-                    .then(function(items) {
-                        root.items = items;
-                        res.status(200).json(items);
-                    }, function(err) {
-                        res.status(500).send(err);
-                    })
-
-
-            },
-            function(err) {
-                res.status(500).send(err);
+        .then(function(exams) {
+            for (var i = 0; i < exams.length; i++) {
+                passed_directories.push(exams[i].directory.toString());
             }
-        )
+            var root = { label: '练习题库', items: [] };
+            Directory.find({ parent: { $exists: false } })
+                .exec()
+                .then(function(directories) {
+                        var promises = [];
+                        directories.forEach(function(directory) {
+                            promises.push(getNode(directory, passed_directories));
+                        });
+                        Q.all(promises)
+                            .then(function(items) {
+                                root.items = items;
+                                res.status(200).json(items);
+                            }, function(err) {
+                                res.status(500).send(err);
+                            })
 
+                    },
+                    function(err) {
+                        res.status(500).send(err);
+                    }
+                )
+        })
 });
 
-function getChildren(parent) {
+function getChildren(parent, passed_directories) {
     var defer = Q.defer();
+    var deepPopulate = '';
+    if (parent.level === 2) {
+        deepPopulate = 'parent.parent'
+    }
     Directory.find({ parent: parent._id })
+        .deepPopulate(deepPopulate)
         .exec()
         .then(function(directories) {
                 if (directories.length == 0) {
@@ -110,7 +125,7 @@ function getChildren(parent) {
                 } else {
                     var promises = [];
                     directories.forEach(function(directory) {
-                        promises.push(getNode(directory));
+                        promises.push(getNode(directory, passed_directories));
                     });
                     Q.all(promises)
                         .then(function(items) {
@@ -137,24 +152,32 @@ function getChildren(parent) {
     return defer.promise;
 }
 
-function getNode(directory) {
-
+function getNode(directory, passed_directories) {
     var defer = Q.defer();
     var node = {};
     node.label = directory.name;
     if (directory.level == 3) {
-        node.id = directory._id;
+        if (passed_directories.indexOf(directory._id.toString()) >= 0) {
+            node.label = directory.name + " (已达标)";
+        }
+        node._id = directory._id;
+        node.exam_pass_score = directory.exam_pass_score;
+        node.path = directory.parent.parent.name + "/" + directory.parent.name + "/" + directory.name;
+        node.owner = directory.owner;
+        defer.resolve(node);
+    } else {
+        getChildren(directory, passed_directories)
+            .then(function(data) {
+                if (data && data.length > 0) {
+                    node.items = data;
+                }
+                defer.resolve(node);
+            }, function(err) {
+                defer.reject(err);
+            })
     }
 
-    getChildren(directory)
-        .then(function(data) {
-            if (data && data.length > 0) {
-                node.items = data;
-            }
-            defer.resolve(node);
-        }, function(err) {
-            defer.reject(err);
-        })
+
     return defer.promise;
 }
 

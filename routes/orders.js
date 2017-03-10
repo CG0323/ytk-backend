@@ -6,14 +6,235 @@ var jwt = require('express-jwt');
 var config = require('../common.js').config();
 var logger = require('../utils/logger.js');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
+var Order = require('../models/order')(db);
+var User = require('../models/user')(db);
+var WXPay = require('node-wxpay');
+var fs = require("fs");
+
+var wxpay = WXPay({
+    appid: config.wxpay.app_id,
+    mch_id: config.wxpay.mch_id,
+    partner_key: config.wxpay.partner_key,
+    // pfx: fs.readFileSync('./wxpay_cert.p12'),
+});
 
 router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
-    var orderNo = generateOrderNo();
-    res.status(200).json({ orderNo: orderNo });
+    var order = req.body;
+    if (order.out_trade_no) { // already created wx order once, need to close it
+        closeOrder(order.out_trade_no);
+    }
+    var out_trade_no = generateOutTradeNo();
+    wxpay.createUnifiedOrder({
+        body: '弈通康激活支付测试',
+        out_trade_no: out_trade_no,
+        total_fee: Math.floor(order.total_fee * 100),
+        spbill_create_ip: '192.168.2.210',
+        notify_url: config.wxpay.notify_url,
+        trade_type: 'NATIVE',
+        product_id: order.package
+    }, function(err, result) {
+        if (err) {
+            res.status(500).json({ message: err });
+        }
+        order.out_trade_no = out_trade_no;
+        order.user = req.user.iss;
+        order.payer_name = req.user.name;
+        var insertOrder = new Order(order);
+        insertOrder.save(function(err, savedOrder, numAffected) {
+            if (err) {
+                console.log(err);
+                res.status(500).json({ message: err });
+            } else {
+                res.status(200).json({ out_trade_no: out_trade_no, pay_url: result.code_url });
+            }
+        });
+    });
+
 });
 
 
-function generateOrderNo() {
+
+router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
+    // msg: 微信回调发送的数据
+    res.success();
+    var payInfo = msg;
+    if (payInfo.return_code != "SUCCESS" || payInfo.result_code != "SUCCESS") {
+        return;
+    }
+    var out_trade_no = payInfo.out_trade_no;
+    Order.find({ out_trade_no: payInfo.out_trade_no, transaction_id: { $exists: false } })
+        .exec()
+        .then(function(data) {
+            if (data.length > 0) {
+                var order = data[0];
+                order.transaction_id = payInfo.transaction_id;
+                order.order_date = new Date();
+                order.save();
+                return order;
+            }
+        })
+        .then(function(order) {
+            var addMonth = order.package == "12个月" ? 12 : 3;
+            var usernames = order.student_usernames.split(";");
+            for (var i = 0; i < usernames.length; i++) {
+                var username = usernames[i];
+                User.find({ username: username })
+                    .populate('teacher')
+                    .exec()
+                    .then(function(users) {
+                        if (users.length > 0) {
+                            var user = users[0];
+                            var expired_at = user.expired_at;
+                            let expiration = null;
+                            if (expired_at) {
+                                expiration = new Date(expired_at);
+                                expiration.setMonth(expiration.getMonth() + addMonth);
+                            } else {
+                                let d = new Date();
+                                d.setMonth(d.getMonth() + addMonth)
+                                expiration = d;
+                            }
+                            user.expired_at = expiration;
+                            user.save();
+                            logger.info(user.teacher.name + "用微信支付了订单：" + order.out_trade_no);
+                        }
+                    }, function(err) {
+                        logger.error("更新学员有效期失败：" + err);
+                    })
+            }
+        })
+}));
+
+
+router.get('/query/:out_trade_no', jwt({ secret: secretCallback }), function(req, res) {
+    var out_trade_no = req.params.out_trade_no;
+    Order.find({ out_trade_no: out_trade_no, transaction_id: { $exists: true } })
+        .exec()
+        .then(function(orders) {
+                res.json(orders);
+            },
+            function(err) {
+                logger.error("查询订单失败。" + err);
+                res.status(500).json({ message: err });
+            }
+        )
+})
+
+router.delete('/:out_trade_no', jwt({ secret: secretCallback }), function(req, res, next) {
+    var out_trade_no = req.params.out_trade_no;
+    closeOrder(out_trade_no);
+});
+
+// router.post('/', jwt({ secret: secretCallback }), function(req, res) {
+//     var updated_order = req.body;
+//     Order.find({ out_trade_no: updated_order.out_trade_no })
+//         .exec()
+//         .then(function(data) {
+//                 var setting;
+//                 if (data.length === 0) { // db is empty, create the first one
+//                     res.status(500).json({ message: "该订单尚未完成支付" });
+//                 } else { // update existing one
+//                     order = data[0];
+//                     order.user = req.user.iss;
+//                     order.payer_name = req.user.name;
+//                     order.transaction_id = "1234567890123";
+//                     order.order_date = new Date();
+//                     order.total_fee = updated_order.total_fee;
+//                     order.package = updated_order.package;
+//                     order.student_usernames = updated_order.student_usernames;
+//                     order.student_names = updated_order.student_names;
+//                     order.save(function(err, savedOrder, numAffected) {
+//                         if (err) {
+//                             res.status(500).json({ message: err });
+//                         } else {
+//                             res.status(200).json({ message: "订单信息已成功保存" });
+//                         }
+//                     });
+//                 }
+//             },
+//             function(err) {
+//                 res.status(500).json({ message: err });
+//             }
+//         )
+// });
+
+//临时接口
+router.get('/clear', function(req, res, next) {
+    Order.find()
+        .remove()
+        .exec()
+        .then(function(orders) {
+                res.json(orders);
+            },
+            function(err) {
+                res.status(500).end();
+            }
+        )
+});
+
+//临时接口
+router.get('/', function(req, res, next) {
+    var query = {};
+    Order.find(query)
+        .exec()
+        .then(function(orders) {
+                res.json(orders);
+            },
+            function(err) {
+                res.status(500).json({ message: err });
+            }
+        )
+});
+
+router.post('/search', jwt({ secret: secretCallback }), function(req, res, next) {
+    var param = req.body;
+    var first = param.first;
+    var rows = param.rows;
+    var search = param.search;
+    var conditions = {};
+    if (search) {
+        conditions = {
+            $or: [
+                { out_trade_no: { $regex: search } },
+                { transaction_id: { $regex: search } },
+                { student_usernames: { $regex: search } },
+                { student_names: { $regex: search } },
+                { payer_name: { $regex: search } },
+            ]
+        };
+    }
+    conditions.transaction_id = { $exists: true };
+    if (req.user.role === "老师") { // 老师只能查看自己的支付记录
+        conditions.user = req.user.iss;
+    }
+
+    Order.find(conditions)
+        .sort({ order_date: -1 })
+        .skip(first)
+        .limit(rows)
+        .exec()
+        .then(function(orders) {
+                Order.count(conditions, function(err, c) {
+                    if (err) {
+                        logger.error(err);
+                        res.status(500).json({ message: "获取订单总数失败" });
+                    }
+                    res.status(200).json({
+                        totalCount: c,
+                        orders: orders
+                    })
+                });
+            },
+            function(err) {
+                logger.error("搜索订单失败。" + err)
+                res.status(500).json({ message: err });
+            }
+        )
+});
+
+
+
+function generateOutTradeNo() {
     var now = new Date();
     var prefix = (now.toISOString().replace(/[-T:Z\.]/g, '').substr(0, 16)).toString();
     var total = 1;
@@ -25,6 +246,17 @@ function generateOrderNo() {
 
     var random = base + Math.floor(Math.random() * fill);
     return prefix + random;
+}
+
+function closeOrder(out_trade_no) {
+    Order.find({ out_trade_no: out_trade_no, transaction_id: { $exists: false } })
+        .exec()
+        .then(function(data) {
+            if (data.length > 0) {
+                wxpay.closeOrder({ out_trade_no: out_trade_no });
+                Order.remove({ out_trade_no: out_trade_no, transaction_id: { $exists: false } });
+            }
+        })
 }
 
 

@@ -13,8 +13,12 @@ var schema = new mongoose.Schema({
     expired_at: { type: Date },
     created_at: { type: Date },
     updated_at: { type: Date },
-    last_key: String
+    last_key: String,
+    mail: String,
+    mail_post_at: { type: Date },
 });
+
+schema.index({ teacher: 1, expired_at: 1 });
 
 schema.plugin(passportLocalMongoose);
 
