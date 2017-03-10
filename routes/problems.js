@@ -6,11 +6,12 @@ var Q = require('q');
 var jwt = require('express-jwt');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
 
-router.post('/', function(req, res) {
+router.post('/', jwt({ secret: secretCallback }),function(req, res) {
+    console.log("post problem");
     var problem = new Problem(req.body);
     problem.save(function(err, savedProblem, numAffected) {
         if (err) {
-            console.log(err);
+            //console.log(err);
             res.status(500).send(err);
         } else {
             res.status(200).json({ name: savedProblem.name });
@@ -58,6 +59,16 @@ router.get('/directories/:id', jwt({ secret: secretCallback }), function(req, re
                 res.status(500).end();
             }
         )
+});
+
+router.delete('/:id', jwt({ secret: secretCallback }), function(req, res) {
+    Problem.remove({ _id: req.params.id }, function(err, problem) {
+        if (err) {
+            logger.error(err);
+            res.status(500).json({ message: err });
+        }
+        res.json({ message: '题目已成功删除' });
+    });
 });
 
 
