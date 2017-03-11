@@ -3,6 +3,7 @@ var db = require('../utils/database.js').connection;
 var WrongRecord = require('../models/wrongrecord')(db);
 var router = express.Router();
 var Q = require('q');
+var logger = require('../utils/logger.js');
 var config = require('../common.js').config();
 var jwt = require('express-jwt');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
@@ -15,6 +16,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
         WrongRecord.remove({ user: user.iss, problem: data.problem })
             .exec()
             .then(function(data) {
+                    logger.info(user.name + "删除了错题记录");
                     res.json({ message: "错题记录已成功删除" });
                 },
                 function(err) {
@@ -34,6 +36,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
                         if (err) {
                             res.status(500).send(err);
                         } else {
+                            logger.info(user.name + "添加了错题记录");
                             res.status(200).json({ _id: savedRecord._id });
                         }
                     });
