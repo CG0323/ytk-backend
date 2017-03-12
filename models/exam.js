@@ -12,8 +12,8 @@ var schema = new mongoose.Schema({
     right_move_count: Number,
     right_count: Number,
     wrong_count: Number,
-    score: Number,
-    time_bonus: Number,
+    // score: Number,
+    // time_bonus: Number,
     total_score: Number,
     status: String
 });

@@ -45,12 +45,8 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
                     settings.price_12_months = new_settings.price_12_months;
                     settings.trial_days = new_settings.trial_days;
                     settings.exam_duration = new_settings.exam_duration;
-                    settings.score_per_turn = new_settings.score_per_turn;
-                    settings.time_bonus_per_second = new_settings.time_bonus_per_second;
                     settings.default_pass_score = new_settings.default_pass_score;
                 }
-
-                updateAllExamResults(settings);
 
                 settings.save(function(err, savedSettings, numAffected) {
                     if (err) {
@@ -74,29 +70,11 @@ function getDefaultSettings() {
     settings.trial_days = 15;
     settings.exam_duration = 3;
     settings.score_per_turn = 10;
-    settings.time_bonus_per_second = 5;
+    // settings.time_bonus_per_second = 5;
     settings.default_pass_score = 600;
     return settings;
 }
 
-function updateAllExamResults(settings) {
-    Exam.find({})
-        .exec()
-        .then(function(exams) {
-            for (var i = 0; i < exams.length; i++) {
-                var exam = exams[i];
-                exam.score = exam.right_move_count * settings.score_per_turn;
-                let ratio = 0;
-                if (exam.right_count > 0) {
-                    ratio = exam.right_count / (exam.right_count + exam.wrong_count);
-                }
-                let remainTime = settings.exam_duration * 60 - exam.duration / 1000;
-                exam.time_bonus = remainTime > 1 ? Math.floor(remainTime * settings.time_bonus_per_second * ratio) : 0;
-                exam.total_score = exam.score + exam.time_bonus;
-                exam.save();
-            }
-        })
-}
 
 
 
