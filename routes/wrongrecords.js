@@ -97,17 +97,17 @@ router.get('/user/:userId', jwt({ secret: secretCallback }), function(req, res, 
 });
 
 //临时接口
-router.get('/clear', function(req, res, next) {
-    WrongRecord.find()
-        .remove()
-        .exec()
-        .then(function(result) {
-                res.json(result);
-            },
-            function(err) {
-                res.status(500).end();
-            }
-        )
-});
+// router.get('/clear', function(req, res, next) {
+//     WrongRecord.find()
+//         .remove()
+//         .exec()
+//         .then(function(result) {
+//                 res.json(result);
+//             },
+//             function(err) {
+//                 res.status(500).end();
+//             }
+//         )
+// });
 
 module.exports = router;

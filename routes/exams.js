@@ -37,18 +37,18 @@ router.get('/', function(req, res, next) {
 });
 
 //临时接口
-router.get('/clear', function(req, res, next) {
-    Exam.find()
-        .remove()
-        .exec()
-        .then(function(exams) {
-                res.json(exams);
-            },
-            function(err) {
-                res.status(500).end();
-            }
-        )
-});
+// router.get('/clear', function(req, res, next) {
+//     Exam.find()
+//         .remove()
+//         .exec()
+//         .then(function(exams) {
+//                 res.json(exams);
+//             },
+//             function(err) {
+//                 res.status(500).end();
+//             }
+//         )
+// });
 
 router.get('/directory/:id', jwt({ secret: secretCallback }), function(req, res, next) {
     var directoryId = req.params.id;
