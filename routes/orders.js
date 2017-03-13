@@ -197,8 +197,9 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
             $or: [
                 { out_trade_no: { $regex: search } },
                 { transaction_id: { $regex: search } },
-                { student_usernames: { $regex: search } },
-                { student_names: { $regex: search } },
+                { student_list: { $regex: search } },
+                // { student_usernames: { $regex: search } },
+                // { student_names: { $regex: search } },
                 { payer_name: { $regex: search } },
             ]
         };

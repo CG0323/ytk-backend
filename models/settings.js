@@ -8,8 +8,6 @@ var schema = new mongoose.Schema({
     price_12_months: Number,
     trial_days: Number,
     exam_duration: Number,
-    // score_per_turn: Number,
-    // time_bonus_per_second: Number,
     default_pass_score: Number
 });
 
