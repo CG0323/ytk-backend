@@ -4,6 +4,7 @@ var Issue = require('../models/issue')(db);
 var router = express.Router();
 var Q = require('q');
 var config = require('../common.js').config();
+var logger = require('../utils/logger.js');
 var jwt = require('express-jwt');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
 
@@ -17,6 +18,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
             if (err) {
                 res.status(500).json({ message: err });
             } else {
+                logger.info(user.name + "提交了一条错误汇报");
                 res.status(200).json({ message: "报错已成功保存" });
             }
         });
@@ -35,6 +37,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
                 if (err) {
                     res.status(500).json({ message: err });
                 } else {
+                    logger.info(user.name + "更新了一条错误汇报");
                     res.status(200).json({ message: "报错已成功更新" });
                 }
             });
@@ -98,6 +101,7 @@ router.delete('/:id', jwt({ secret: secretCallback }), function(req, res, next) 
     Issue.remove({ _id: id })
         .exec()
         .then(function(data) {
+                logger.info(req.user.name + "删除了一条错误汇报");
                 res.json({ message: "记录已成功删除" });
             },
             function(err) {

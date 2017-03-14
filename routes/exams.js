@@ -4,6 +4,7 @@ var Exam = require('../models/exam')(db);
 var router = express.Router();
 var Q = require('q');
 var config = require('../common.js').config();
+var logger = require('../utils/logger.js');
 var jwt = require('express-jwt');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
 
@@ -16,6 +17,7 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
         if (err) {
             res.status(500).json({ error: err, message: "测验结果保存失败" });
         } else {
+            logger.info(user.name + "完成了一次测验");
             res.status(200).json({ message: "测验结果已保存" });
         }
     });
@@ -55,6 +57,7 @@ router.get('/directory/:id', jwt({ secret: secretCallback }), function(req, res,
     Exam.find({ directory: directoryId })
         .exec()
         .then(function(exams) {
+                logger.info(req.user.name + "查看了排行榜");
                 res.json(exams);
             },
             function(err) {

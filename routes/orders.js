@@ -42,7 +42,6 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
         var insertOrder = new Order(order);
         insertOrder.save(function(err, savedOrder, numAffected) {
             if (err) {
-                console.log(err);
                 res.status(500).json({ message: err });
             } else {
                 res.status(200).json({ out_trade_no: out_trade_no, pay_url: result.code_url });
