@@ -208,14 +208,24 @@ router.post('/student', jwt({ secret: secretCallback }), function(req, res) {
 
 
 router.delete('/:id', jwt({ secret: secretCallback }), function(req, res) {
-    User.remove({ _id: req.params.id }, function(err, user) {
-        if (err) {
+    User.findById({ _id: req.params.id })
+        .exec()
+        .then(function(user) {
+            logger.info(req.user.name + " 删除了 " + user.username + " 的账号");
+            user.remove();
+            res.json({ message: '账号已成功删除' });
+        }, function(err) {
             logger.error(err);
             res.status(500).json({ message: err });
-        }
-        logger.info(req.user.name + " 删除了 " + req.params.id + " 的账号");
-        res.json({ message: '账号已成功删除' });
-    });
+        })
+        // User.remove({ _id: req.params.id }, function(err, user) {
+        //     if (err) {
+        //         logger.error(err);
+        //         res.status(500).json({ message: err });
+        //     }
+        //     logger.info(req.user.name + " 删除了 " + req.params.id + " 的账号");
+        //     res.json({ message: '账号已成功删除' });
+        // });
 });
 
 //debug only
