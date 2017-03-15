@@ -13,10 +13,10 @@ var Settings = require('../models/settings')(db);
 
 router.get('/me', jwt({ secret: secretCallback }), function(req, res) {
     User.findOne({ _id: req.user.iss })
-        .populate({ path: 'teacher', select: { _id: 1, name: 1, mail: 1, mail_post_at: 1 } })
+        .populate({ path: 'teacher', select: { _id: 1, name: 1, mail: 1, mail_post_at: 1, welcome_message: 1 } })
         .exec()
         .then(function(user) {
-            res.status(200).json({ _id: user._id, username: user.username, name: user.name, role: user.role, teacher: user.teacher, expired_at: user.expired_at, mail: user.mail, mail_post_at: user.mail_post_at });
+            res.status(200).json({ _id: user._id, username: user.username, name: user.name, role: user.role, teacher: user.teacher, expired_at: user.expired_at, mail: user.mail, mail_post_at: user.mail_post_at, welcome_message: user.welcome_message });
         }, function(err) {
             logger.error(err);
             res.status(500).json({ message: err });
@@ -218,14 +218,6 @@ router.delete('/:id', jwt({ secret: secretCallback }), function(req, res) {
             logger.error(err);
             res.status(500).json({ message: err });
         })
-        // User.remove({ _id: req.params.id }, function(err, user) {
-        //     if (err) {
-        //         logger.error(err);
-        //         res.status(500).json({ message: err });
-        //     }
-        //     logger.info(req.user.name + " 删除了 " + req.params.id + " 的账号");
-        //     res.json({ message: '账号已成功删除' });
-        // });
 });
 
 //debug only
@@ -404,6 +396,22 @@ router.post('/mail', jwt({ secret: secretCallback }), function(req, res) {
             }
             logger.info(user.username + " 更新了通知信息" + "。");
             res.json({ message: '通知栏已成功设置' });
+        });
+    });
+});
+
+router.post('/welcome', jwt({ secret: secretCallback }), function(req, res) {
+    User.findById(req.user.iss, function(err, user) {
+        if (err)
+            res.status(500).json({ message: err });
+        user.welcome_message = req.body.welcome_message;
+        user.save(function(err) {
+            if (err) {
+                logger.error(err);
+                res.status(500).json({ message: err });
+            }
+            logger.info(user.username + " 更新了欢迎信息" + "。");
+            res.json({ message: '欢迎信息已成功设置' });
         });
     });
 });

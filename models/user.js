@@ -16,6 +16,7 @@ var schema = new mongoose.Schema({
     last_key: String,
     mail: String,
     mail_post_at: { type: Date },
+    welcome_message: String
 });
 
 schema.index({ teacher: 1, expired_at: 1 });
