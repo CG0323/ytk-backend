@@ -43,6 +43,8 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
                     settings = data[0];
                     settings.price_3_months = new_settings.price_3_months;
                     settings.price_12_months = new_settings.price_12_months;
+                    settings.commission_3_months = new_settings.commission_3_months;
+                    settings.commission_12_months = new_settings.commission_12_months;
                     settings.trial_days = new_settings.trial_days;
                     settings.exam_duration = new_settings.exam_duration;
                     settings.default_pass_score = new_settings.default_pass_score;
