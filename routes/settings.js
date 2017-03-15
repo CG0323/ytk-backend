@@ -65,8 +65,10 @@ router.post('/', jwt({ secret: secretCallback }), function(req, res) {
 
 function getDefaultSettings() {
     var settings = {};
-    settings.price_3_months = 10;
-    settings.price_12_months = 30;
+    settings.price_3_months = 90;
+    settings.price_12_months = 300;
+    settings.commission_3_months = 10;
+    settings.commission_12_months = 30;
     settings.trial_days = 15;
     settings.exam_duration = 3;
     settings.score_per_turn = 10;
