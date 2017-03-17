@@ -627,4 +627,29 @@ function RemoveRelatedData(userId) {
 }
 
 
+//临时接口
+router.post('/student-migration', jwt({ secret: secretCallback }), function(req, res) {
+    var user = req.user;
+    var data = req.body;
+    User.find({ username: data.username }, function(err, users) {
+        if (users.length > 0) {
+            res.status(400).json({ message: '用户名已被使用' });
+        } else {
+            var expired_at = new Date(data.expired_at);
+            User.register(new User({ teacher: data.teacher, username: data.username, name: data.name, role: "学员", init_password: data.password, expired_at: expired_at }), data.password, function(err, savedUser) {
+                if (err) {
+                    logger.error(err);
+                    res.status(500).json({ message: err });
+                } else {
+                    logger.info(req.user.name + " 创建了学员账号：" + data.username);
+                    IncrementSequence(req.user.iss)
+                        .then(function() {
+                            res.status(200).json({ message: '已成功创建学员账号', user: { _id: savedUser._id, username: savedUser.username, name: savedUser.name, password: savedUser.init_password, teacher: savedUser.teacher } });
+                        });
+                }
+            });
+        }
+    })
+});
+
 module.exports = router;
