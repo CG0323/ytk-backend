@@ -206,8 +206,10 @@ router.post('/student', jwt({ secret: secretCallback }), function(req, res) {
                                         res.status(500).json({ message: err });
                                     } else {
                                         logger.info(req.user.name + " 创建了学员账号：" + data.username);
-                                        IncrementSequence(req.user.iss);
-                                        res.status(200).json({ message: '已成功创建学员账号', user: { _id: savedUser._id, username: savedUser.username, name: savedUser.name, password: savedUser.init_password, teacher: savedUser.teacher } });
+                                        IncrementSequence(req.user.iss)
+                                            .then(function() {
+                                                res.status(200).json({ message: '已成功创建学员账号', user: { _id: savedUser._id, username: savedUser.username, name: savedUser.name, password: savedUser.init_password, teacher: savedUser.teacher } });
+                                            });
                                     }
                                 });
                             })
@@ -585,23 +587,33 @@ function getQuota(userId) {
 }
 
 function IncrementSequence(userId) {
+    var defer = Q.defer();
     Sequence.find({ user: userId })
         .exec()
         .then(function(data) {
+                var sequence = null;
                 if (data.length > 0) {
-                    data[0].sequence += 1;
-                    data[0].save();
+                    sequence = data[0];
+                    sequence.sequence += 1;
                 } else {
-                    var sequence = new Sequence();
+                    sequence = new Sequence();
                     sequence.user = userId;
                     sequence.sequence = 2;
-                    sequence.save();
                 }
+                sequence.save(function(err) {
+                    if (err) {
+                        logger.error(err);
+                    }
+                    logger.info(user.name + " 修改了学员序号。");
+                    defer.resolve();
+                });
             },
             function(err) {
+                defer.reject();
                 logger.error(err);
             }
         )
+    return defer.promise;
 }
 
 
