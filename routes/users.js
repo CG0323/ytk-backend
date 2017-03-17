@@ -256,6 +256,28 @@ router.get('/teachers', jwt({ secret: secretCallback }), function(req, res, next
         )
 });
 
+router.get('/teachers-and-admins', jwt({ secret: secretCallback }), function(req, res, next) {
+    var user = req.user;
+    var query = { $or: [{ role: "老师" }, { role: "管理员" }] };
+    User.find(query)
+        .exec()
+        .then(function(data) {
+                var teachers = data.map(item => {
+                    var teacher = {};
+                    teacher._id = item._id;
+                    teacher.username = item.username;
+                    teacher.name = item.name;
+                    teacher.password = item.init_password;
+                    return teacher;
+                })
+                res.json(teachers);
+            },
+            function(err) {
+                res.status(500).json({ message: err });
+            }
+        )
+});
+
 router.post('/search-students', jwt({ secret: secretCallback }), function(req, res, next) {
     if (req.user.role == "学员") {
         res.status(401).json({ message: "无权限查看学员账号" });
