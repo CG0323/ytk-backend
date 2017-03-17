@@ -620,9 +620,10 @@ function IncrementSequence(userId) {
 }
 
 function RemoveRelatedData(userId) {
-    Exam.remove({ user: userId });
-    WrongRecord.remove({ user: userId });
-    Issue.remove({ submitter: userId });
+    console.log(userId);
+    Exam.remove({ user: userId }, function() {});
+    WrongRecord.remove({ user: userId }, function() {});
+    Issue.remove({ submitter: userId }, function() {});
 }
 
 
