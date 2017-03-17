@@ -5,7 +5,7 @@ mongoose.Promise = require('q').Promise;
 
 var schema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    sequence: Number = 1
+    sequence: Number
 });
 
 schema.index({ user: 1 });
