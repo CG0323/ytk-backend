@@ -162,7 +162,7 @@ router.post('/teacher', jwt({ secret: secretCallback }), function(req, res) {
             res.status(400).json({ message: '用户名或教师姓名已被使用' });
         } else {
             var expired_at = new Date("2030-12-31");
-            User.register(new User({ username: data.username, name: data.name, role: "老师", init_password: data.password, expired_at: expired_at }), data.password, function(err, user) {
+            User.register(new User({ username: data.username, name: data.name, quota: data.quota, role: "老师", init_password: data.password, expired_at: expired_at }), data.password, function(err, user) {
                 if (err) {
                     logger.error(err);
                     res.status(500).json({ message: err });
