@@ -10,6 +10,8 @@ var jwt = require('express-jwt');
 var moment = require('moment');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
 var Settings = require('../models/settings')(db);
+var Sequence = require('../models/sequence')(db);
+var Q = require('q');
 
 router.get('/me', jwt({ secret: secretCallback }), function(req, res) {
     User.findOne({ _id: req.user.iss })
@@ -178,32 +180,47 @@ router.post('/student', jwt({ secret: secretCallback }), function(req, res) {
     var user = req.user;
     if (user.role == "学员") {
         res.status(401).json({ message: "无权限创建学员账号" });
+        return;
     }
     var data = req.body;
-    User.find({ username: data.username }, function(err, users) {
-        if (users.length > 0) {
-            res.status(400).json({ message: '用户名已被使用' });
-        } else {
-            var settings = getDefaultSettings();
-            Settings.find({})
-                .then(function(settingsList) {
-                    if (settingsList.length > 0) {
-                        settings = settingsList[0];
-                    }
-                    var expired_at = moment().add(settings.trial_days, 'days');
-                    User.register(new User({ teacher: user.iss, username: data.username, name: data.name, role: "学员", init_password: data.password, expired_at: expired_at }), data.password, function(err, savedUser) {
-                        if (err) {
-                            logger.error(err);
-                            res.status(500).json({ message: err });
-                        } else {
-                            logger.info(req.user.name + " 创建了学员账号：" + data.username);
-                            res.status(200).json({ message: '已成功创建学员账号', user: { _id: savedUser._id, username: savedUser.username, name: savedUser.name, password: savedUser.init_password, teacher: savedUser.teacher } });
-                        }
-                    });
-                })
-        }
 
-    })
+    getQuota(user._id)
+        .then(function(quota) {
+            if (quota && quota < data.sequence) {
+                res.status(400).json({ message: "学员配额已用完，请联系管理员申请增加配额" });
+            } else {
+                User.find({ username: data.username }, function(err, users) {
+                    if (users.length > 0) {
+                        res.status(400).json({ message: '用户名已被使用' });
+                    } else {
+                        var settings = getDefaultSettings();
+                        Settings.find({})
+                            .then(function(settingsList) {
+                                if (settingsList.length > 0) {
+                                    settings = settingsList[0];
+                                }
+                                var expired_at = moment().add(settings.trial_days, 'days');
+                                User.register(new User({ teacher: user.iss, username: data.username, name: data.name, role: "学员", init_password: data.password, expired_at: expired_at }), data.password, function(err, savedUser) {
+                                    if (err) {
+                                        logger.error(err);
+                                        res.status(500).json({ message: err });
+                                    } else {
+                                        logger.info(req.user.name + " 创建了学员账号：" + data.username);
+                                        IncrementSequence(req.user.iss);
+                                        res.status(200).json({ message: '已成功创建学员账号', user: { _id: savedUser._id, username: savedUser.username, name: savedUser.name, password: savedUser.init_password, teacher: savedUser.teacher } });
+                                    }
+                                });
+                            })
+                    }
+
+                })
+            }
+        })
+
+
+
+
+
 });
 
 
@@ -552,6 +569,39 @@ function getDefaultSettings() {
     settings.time_bonus_per_second = 5;
     settings.default_pass_score = 600;
     return settings;
+}
+
+function getQuota(userId) {
+    var defer = Q.defer();
+    User.findOne({ _id: userId })
+        .exec()
+        .then(function(user) {
+            defer.resolve(user.quota);
+        }, function(err) {
+            logger.error(err);
+            defer.reject(err);
+        });
+    return defer.promise;
+}
+
+function IncrementSequence(userId) {
+    Sequence.find({ user: userId })
+        .exec()
+        .then(function(data) {
+                if (data.length > 0) {
+                    data[0].sequence += 1;
+                    data[0].save();
+                } else {
+                    var sequence = new Sequence();
+                    sequence.user = userId;
+                    sequence.sequence = 2;
+                    sequence.save();
+                }
+            },
+            function(err) {
+                logger.error(err);
+            }
+        )
 }
 
 

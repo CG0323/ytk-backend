@@ -53,7 +53,7 @@ router.get('/', jwt({ secret: secretCallback }), function(req, res, next) {
                 }
             },
             function(err) {
-                rres.status(500).json({ message: err });
+                res.status(500).json({ message: err });
             }
         )
 });
