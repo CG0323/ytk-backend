@@ -13,6 +13,7 @@ var Settings = require('../models/settings')(db);
 var Sequence = require('../models/sequence')(db);
 var Exam = require('../models/exam')(db);
 var WrongRecord = require('../models/wrongrecord')(db);
+var Issue = require('../models/issue')(db);
 var Q = require('q');
 
 router.get('/me', jwt({ secret: secretCallback }), function(req, res) {
@@ -621,6 +622,7 @@ function IncrementSequence(userId) {
 function RemoveRelatedData(userId) {
     Exam.remove({ user: userId });
     WrongRecord.remove({ user: userId });
+    Issue.remove({ submitter: userId });
 }
 
 
