@@ -184,7 +184,7 @@ router.post('/student', jwt({ secret: secretCallback }), function(req, res) {
     }
     var data = req.body;
 
-    getQuota(user._id)
+    getQuota(req.user.iss)
         .then(function(quota) {
             if (quota && quota < data.sequence) {
                 res.status(400).json({ message: "学员配额已用完，请联系管理员申请增加配额" });
