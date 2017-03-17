@@ -11,6 +11,8 @@ var moment = require('moment');
 var secretCallback = require('../utils/secretCallback.js').secretCallback;
 var Settings = require('../models/settings')(db);
 var Sequence = require('../models/sequence')(db);
+var Exam = require('../models/exam')(db);
+var WrongRecord = require('../models/wrongrecord')(db);
 var Q = require('q');
 
 router.get('/me', jwt({ secret: secretCallback }), function(req, res) {
@@ -232,6 +234,7 @@ router.delete('/:id', jwt({ secret: secretCallback }), function(req, res) {
         .then(function(user) {
             logger.info(req.user.name + " 删除了 " + user.username + " 的账号");
             user.remove();
+            RemoveRelatedData(req.params.id);
             res.json({ message: '账号已成功删除' });
         }, function(err) {
             logger.error(err);
@@ -613,6 +616,11 @@ function IncrementSequence(userId) {
             }
         )
     return defer.promise;
+}
+
+function RemoveRelatedData(userId) {
+    Exam.remove({ user: userId });
+    WrongRecord.remove({ user: userId });
 }
 
 
