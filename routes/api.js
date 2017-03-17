@@ -7,6 +7,7 @@ var orders = require('./orders.js');
 var exams = require('./exams.js');
 var settings = require('./settings.js');
 var issues = require('./issues.js');
+var sequences = require('./sequences.js');
 var router = express.Router();
 
 router.use('/directories', directories);
@@ -17,4 +18,5 @@ router.use('/orders', orders);
 router.use('/exams', exams);
 router.use('/settings', settings);
 router.use('/issues', issues);
+router.use('/sequences', sequences);
 module.exports = router;
