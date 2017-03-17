@@ -604,7 +604,6 @@ function IncrementSequence(userId) {
                     if (err) {
                         logger.error(err);
                     }
-                    logger.info(user.name + " 修改了学员序号。");
                     defer.resolve();
                 });
             },
