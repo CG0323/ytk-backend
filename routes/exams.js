@@ -54,7 +54,7 @@ router.get('/', function(req, res, next) {
 
 router.get('/directory/:id', jwt({ secret: secretCallback }), function(req, res, next) {
     var directoryId = req.params.id;
-    Exam.find({ directory: directoryId })
+    Exam.find({ directory: directoryId, user: { $exists: true } })
         .exec()
         .then(function(exams) {
                 logger.info(req.user.name + "查看了排行榜");
