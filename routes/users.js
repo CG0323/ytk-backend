@@ -16,7 +16,7 @@ router.get('/me', jwt({ secret: secretCallback }), function(req, res) {
         .populate({ path: 'teacher', select: { _id: 1, name: 1, mail: 1, mail_post_at: 1, welcome_message: 1 } })
         .exec()
         .then(function(user) {
-            res.status(200).json({ _id: user._id, username: user.username, name: user.name, role: user.role, teacher: user.teacher, expired_at: user.expired_at, mail: user.mail, mail_post_at: user.mail_post_at, welcome_message: user.welcome_message });
+            res.status(200).json({ _id: user._id, username: user.username, name: user.name, role: user.role, teacher: user.teacher, expired_at: user.expired_at, mail: user.mail, mail_post_at: user.mail_post_at, welcome_message: user.welcome_message, quota: user.quota });
         }, function(err) {
             logger.error(err);
             res.status(500).json({ message: err });
@@ -110,7 +110,7 @@ router.post('/login', function(req, res, next) {
             var token = jwt_generator.sign(payload, secret, { expiresIn: '24h' });
             logger.info(user.name + " 登录系统。");
             if (user.role != "学员") {
-                res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at });
+                res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at, quota: user.quota });
             } else { //if it is student, get teacher info
                 if (err) {
                     logger.error(err);
@@ -246,6 +246,7 @@ router.get('/teachers', jwt({ secret: secretCallback }), function(req, res, next
                     teacher.username = item.username;
                     teacher.name = item.name;
                     teacher.password = item.init_password;
+                    teacher.quota = item.quota;
                     return teacher;
                 })
                 res.json(teachers);
@@ -460,7 +461,7 @@ router.put('/:id', jwt({ secret: secretCallback }), function(req, res) {
 
 router.post('/resetpsw', jwt({ secret: secretCallback }), function(req, res) {
     if (req.user.role == "学员") {
-        res.status(401).json({ message: "无权限查重置密码" });
+        res.status(401).json({ message: "无权限重置密码" });
     }
     var userId = req.body.userId;
     var newPassword = req.body.newPassword;
@@ -477,6 +478,27 @@ router.post('/resetpsw', jwt({ secret: secretCallback }), function(req, res) {
                     logger.info(req.user.name + " 重置了用户" + user.username + "的密码。");
                     res.status(200).json({ message: '用户密码已成功重置' });
                 });
+            });
+        })
+});
+
+router.post('/resetquota', jwt({ secret: secretCallback }), function(req, res) {
+    if (req.user.role != "管理员") {
+        res.status(401).json({ message: "无权限修改配额" });
+    }
+    var userId = req.body.userId;
+    var newQuota = req.body.quota;
+    User.findById(userId)
+        .exec()
+        .then(function(user) {
+            user.quota = newQuota;
+            user.save(function(err) {
+                if (err) {
+                    logger.error(err);
+                    res.status(400).json({ message: '配额修改失败' });
+                }
+                logger.info(req.user.name + " 修改了老师" + user.username + "的学员配额。");
+                res.status(200).json({ message: '配额已成功修改' });
             });
         })
 });
