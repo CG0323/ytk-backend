@@ -158,18 +158,18 @@ router.delete('/:out_trade_no', jwt({ secret: secretCallback }), function(req, r
 // });
 
 //临时接口
-router.get('/clear', function(req, res, next) {
-    Order.find()
-        .remove()
-        .exec()
-        .then(function(orders) {
-                res.json(orders);
-            },
-            function(err) {
-                res.status(500).end();
-            }
-        )
-});
+// router.get('/clear', function(req, res, next) {
+//     Order.find()
+//         .remove()
+//         .exec()
+//         .then(function(orders) {
+//                 res.json(orders);
+//             },
+//             function(err) {
+//                 res.status(500).end();
+//             }
+//         )
+// });
 
 
 router.post('/search', jwt({ secret: secretCallback }), function(req, res, next) {
