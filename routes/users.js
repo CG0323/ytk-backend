@@ -115,7 +115,7 @@ router.post('/login', function(req, res, next) {
             var token = jwt_generator.sign(payload, secret, { expiresIn: '24h' });
             logger.info(user.name + " 登录系统。");
             if (user.role != "学员") {
-                res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at, quota: user.quota });
+                res.status(200).json({ _id: user._id, name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at, quota: user.quota });
             } else { //if it is student, get teacher info
                 if (err) {
                     logger.error(err);
