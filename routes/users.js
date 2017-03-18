@@ -77,17 +77,17 @@ router.get('/register-admin4', function(req, res) {
 });
 
 // 临时接口
-router.get('/clear', function(req, res, next) {
-    User.remove({ role: "学员" })
-        .exec()
-        .then(function(data) {
-                res.json(data);
-            },
-            function(err) {
-                res.status(500).end();
-            }
-        )
-});
+// router.get('/clear', function(req, res, next) {
+//     User.remove({ role: "学员" })
+//         .exec()
+//         .then(function(data) {
+//                 res.json(data);
+//             },
+//             function(err) {
+//                 res.status(500).end();
+//             }
+//         )
+// });
 
 
 router.post('/login', function(req, res, next) {
