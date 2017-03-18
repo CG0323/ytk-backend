@@ -122,7 +122,7 @@ router.post('/login', function(req, res, next) {
                     res.status(500).json({ message: err });
                 }
                 User.findById(user.teacher, function(err, teacher) {
-                    res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at, teacher: { _id: teacher._id, name: teacher.name, mail: teacher.mail, mail_post_at: teacher.mail_post_at } });
+                    res.status(200).json({ name: user.name, username: user.username, role: user.role, token: token, expired_at: user.expired_at, teacher: { _id: teacher._id, name: teacher.name, mail: teacher.mail, mail_post_at: teacher.mail_post_at, welcome_message: teacher.welcome_message } });
                 })
             }
         }
