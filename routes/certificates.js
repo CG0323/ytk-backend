@@ -92,7 +92,7 @@ router.get('/client-search/:search', function(req, res, next) {
 });
 
 router.post('/client-search', function(req, res, next) {
-    var search = req.body;
+    var search = req.body.search;
     var conditions = { $or: [{ certificate_id: search }, { name: search }] };
     Certificate.find(conditions)
         .sort({ date: -1 })
