@@ -51,8 +51,6 @@ router.post('/prepare', jwt({ secret: secretCallback }), function(req, res) {
 
 });
 
-
-
 router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
     // msg: 微信回调发送的数据
     res.success();
@@ -177,6 +175,19 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
     var first = param.first;
     var rows = param.rows;
     var search = param.search;
+    var from_date = param.from_date;
+    var to_date = param.to_date;
+    if(from_date == undefined){
+        from_date = new Date(0);
+    }
+    if(to_date == undefined){
+        to_date = new Date(86400000000000);//big enough
+    }else{
+        let to_date_tmp = new Date(to_date);
+        to_date_tmp.setDate(to_date_tmp.getDate()+1);
+        to_date = to_date_tmp;
+    }
+
     var conditions = {};
     if (search) {
         conditions = {
@@ -190,6 +201,7 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
             ]
         };
     }
+    conditions['order_date'] = {$gte:from_date,$lt:to_date},
     conditions.transaction_id = { $exists: true };
     if (req.user.role === "老师") { // 老师只能查看自己的支付记录
         conditions.user = req.user.iss;
