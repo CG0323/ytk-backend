@@ -179,6 +179,8 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
     var to_date = param.to_date;
     if(from_date == undefined){
         from_date = new Date(0);
+    }else{
+        from_date = new Date(from_date);
     }
     if(to_date == undefined){
         to_date = new Date(86400000000000);//big enough
@@ -201,34 +203,40 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
             ]
         };
     }
-    conditions['order_date'] = {$gte:from_date,$lt:to_date},
+    conditions.order_date = {$gte:from_date,$lt:to_date},
     conditions.transaction_id = { $exists: true };
     if (req.user.role === "老师") { // 老师只能查看自己的支付记录
         conditions.user = req.user.iss;
     }
 
-    Order.find(conditions)
+    var query1 = Order.find(conditions)
         .sort({ order_date: -1 })
         .skip(first)
         .limit(rows)
-        .exec()
-        .then(function(orders) {
-                Order.count(conditions, function(err, c) {
-                    if (err) {
-                        logger.error(err);
-                        res.status(500).json({ message: "获取订单总数失败" });
-                    }
-                    res.status(200).json({
-                        totalCount: c,
-                        orders: orders
-                    })
-                });
-            },
-            function(err) {
-                logger.error("搜索订单失败。" + err)
-                res.status(500).json({ message: err });
-            }
-        )
+        .exec();
+    var query2 = Order.aggregate([
+                        { $match : conditions},
+                        { $group: { _id: null, count: { $sum: 1 } } }
+                       ]).exec();
+    var query3 = Order.aggregate([
+                        { $match : conditions},
+                        { $group: { _id: null, total_fee: { $sum: "$total_fee" } } }
+                       ]).exec();
+    var query4 = Order.aggregate([
+                        { $match : conditions},
+                        { $group: { _id: null, total_commission: { $sum: "$total_commission" } } }
+                       ]);
+    Promise.all([query1,query2,query3,query4])
+    .then(function([orders,count,total_fee,total_commission]){
+      res.status(200).json({
+        totalCount: count[0].count,
+        orders: orders,
+        total_fee:total_fee[0].total_fee,
+        total_commission:total_commission[0].total_commission
+        }
+    )},function(err){
+        res.status(500).send(err);
+    });
 });
 
 
