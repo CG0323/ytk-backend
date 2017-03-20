@@ -91,6 +91,21 @@ router.get('/client-search/:search', function(req, res, next) {
         )
 });
 
+router.post('/client-search', function(req, res, next) {
+    var search = req.body.search;
+    var conditions = { $or: [{ certificate_id: search }, { name: search }] };
+    Certificate.find(conditions)
+        .sort({ date: -1 })
+        .exec()
+        .then(function(certificates) {
+                res.json(certificates);
+            },
+            function(err) {
+                res.status(500).json({ error: err, message: "查询失败" });
+            }
+        )
+});
+
 router.post('/search', jwt({ secret: secretCallback }), function(req, res, next) {
     var param = req.body;
     var first = param.first;
