@@ -205,6 +205,7 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
     }
     conditions.order_date = {$gte:from_date,$lt:to_date},
     conditions.transaction_id = { $exists: true };
+
     if (req.user.role === "老师") { // 老师只能查看自己的支付记录
         conditions.user = req.user.iss;
     }
@@ -228,16 +229,26 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
                        ]);
     Promise.all([query1,query2,query3,query4])
     .then(function([orders,count,total_fee,total_commission]){
-      res.status(200).json({
-        totalCount: count[0].count,
-        orders: orders,
-        total_fee:total_fee[0].total_fee,
-        total_commission:total_commission[0].total_commission
+        var json;
+        if(count.length>0){
+            json = {
+                totalCount: count[0].count,
+                orders: orders,
+                total_fee:total_fee[0].total_fee,
+                total_commission:total_commission[0].total_commission};
+        }else{
+            json = {
+                totalCount: 0,
+                orders: orders,
+                total_fee:0,
+                total_commission:0
+            };
         }
-    )},function(err){
-        res.status(500).send(err);
+        res.status(200).json(json)
+    },function(err){
+            res.status(500).send(err);
+        });
     });
-});
 
 
 
