@@ -83,7 +83,7 @@ router.use('/wxpay/notify', wxpay.useWXCallback(function(msg, req, res, next) {
                             var user = users[0];
                             var expired_at = user.expired_at;
                             let expiration = null;
-                            if (expired_at) {
+                            if (expired_at && expired_at > new Date()) {
                                 expiration = new Date(expired_at);
                                 expiration.setMonth(expiration.getMonth() + addMonth);
                             } else {
@@ -177,16 +177,16 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
     var search = param.search;
     var from_date = param.from_date;
     var to_date = param.to_date;
-    if(from_date == undefined){
+    if (from_date == undefined) {
         from_date = new Date(0);
-    }else{
+    } else {
         from_date = new Date(from_date);
     }
-    if(to_date == undefined){
-        to_date = new Date(86400000000000);//big enough
-    }else{
+    if (to_date == undefined) {
+        to_date = new Date(86400000000000); //big enough
+    } else {
         let to_date_tmp = new Date(to_date);
-        to_date_tmp.setDate(to_date_tmp.getDate()+1);
+        to_date_tmp.setDate(to_date_tmp.getDate() + 1);
         to_date = to_date_tmp;
     }
 
@@ -203,8 +203,8 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
             ]
         };
     }
-    conditions.order_date = {$gte:from_date,$lt:to_date},
-    conditions.transaction_id = { $exists: true };
+    conditions.order_date = { $gte: from_date, $lt: to_date },
+        conditions.transaction_id = { $exists: true };
     if (req.user.role === "老师") { // 老师只能查看自己的支付记录
         conditions.user = req.user.iss;
     }
@@ -215,28 +215,28 @@ router.post('/search', jwt({ secret: secretCallback }), function(req, res, next)
         .limit(rows)
         .exec();
     var query2 = Order.aggregate([
-                        { $match : conditions},
-                        { $group: { _id: null, count: { $sum: 1 } } }
-                       ]).exec();
+        { $match: conditions },
+        { $group: { _id: null, count: { $sum: 1 } } }
+    ]).exec();
     var query3 = Order.aggregate([
-                        { $match : conditions},
-                        { $group: { _id: null, total_fee: { $sum: "$total_fee" } } }
-                       ]).exec();
+        { $match: conditions },
+        { $group: { _id: null, total_fee: { $sum: "$total_fee" } } }
+    ]).exec();
     var query4 = Order.aggregate([
-                        { $match : conditions},
-                        { $group: { _id: null, total_commission: { $sum: "$total_commission" } } }
-                       ]);
-    Promise.all([query1,query2,query3,query4])
-    .then(function([orders,count,total_fee,total_commission]){
-      res.status(200).json({
-        totalCount: count[0].count,
-        orders: orders,
-        total_fee:total_fee[0].total_fee,
-        total_commission:total_commission[0].total_commission
-        }
-    )},function(err){
-        res.status(500).send(err);
-    });
+        { $match: conditions },
+        { $group: { _id: null, total_commission: { $sum: "$total_commission" } } }
+    ]);
+    Promise.all([query1, query2, query3, query4])
+        .then(function([orders, count, total_fee, total_commission]) {
+            res.status(200).json({
+                totalCount: count[0].count,
+                orders: orders,
+                total_fee: total_fee[0].total_fee,
+                total_commission: total_commission[0].total_commission
+            })
+        }, function(err) {
+            res.status(500).send(err);
+        });
 });
 
 
