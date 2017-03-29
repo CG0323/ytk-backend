@@ -12,7 +12,7 @@ var options = {
     }
 };
 
-var connection = mongoose.createConnection(config.mongodb_server, options);
+var connection = mongoose.createConnection(config.mongodb_server);
 
 connection.on('error', function(err) {
     console.log(err);
