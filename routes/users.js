@@ -89,6 +89,27 @@ router.get('/register-admin4', function(req, res) {
 //         )
 // });
 
+router.get('/correct', function(req, res, next) {
+    User.findOne({ name: "刘晨轩" })
+        .exec()
+        .then(function(user) {
+            user.name = "刘晨钧";
+            user.save();
+        }, function(err) {
+            logger.error(err);
+            res.status(500).json({ message: err });
+        });
+    User.findOne({ name: "余欣怡" })
+        .exec()
+        .then(function(user) {
+            user.name = "余欣仪";
+            user.save();
+        }, function(err) {
+            logger.error(err);
+            res.status(500).json({ message: err });
+        });
+});
+
 
 router.post('/login', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
