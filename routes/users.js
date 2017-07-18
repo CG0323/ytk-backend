@@ -99,7 +99,7 @@ router.get('/correct', function(req, res, next) {
             logger.error(err);
             res.status(500).json({ message: err });
         });
-    User.findOne({ name: "余欣怡" })
+    User.findOne({ username: "ytklxd31" })
         .exec()
         .then(function(user) {
             user.name = "余欣仪";
